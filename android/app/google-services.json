@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "483473236007",
+    "project_id": "puri-ayana-gempol",
+    "storage_bucket": "puri-ayana-gempol.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:483473236007:android:286c53b5c30cdeb1642e02",
+        "android_client_info": {
+          "package_name": "com.example.puri_ayana_gempol"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "483473236007-c9n47tf2kb1d15lsg8ssbd5i1g2p5q5u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0oebUC288RSsAvBjNxmwq4DTJrdF1RxE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "483473236007-c9n47tf2kb1d15lsg8ssbd5i1g2p5q5u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
