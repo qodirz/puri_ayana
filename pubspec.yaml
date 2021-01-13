@@ -35,10 +35,11 @@ dependencies:
   line_icons: ^0.2.0
   badges: ^1.1.1
   image_picker: ^0.6.2+3
-  flutter_html: ^1.0.0
   intl: ^0.16.1
   form_field_validator: ^1.0.1
   horizontal_data_table: ^1.0.8  
+  top_snackbar_flutter: ^0.0.3
+  flutter_svg: 0.18.0
 
 dev_dependencies:
   flutter_test:

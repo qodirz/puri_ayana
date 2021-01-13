@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:puri_ayana_gempol/screen/home/home.dart';
+import 'package:puri_ayana_gempol/screen/info/pengumuman.dart';
 
 class InfoPage extends StatefulWidget {
   
@@ -12,11 +12,6 @@ class InfoPage extends StatefulWidget {
 class _InfoPageState extends State<InfoPage> {
 	GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 	
-  _gotoFormPage(){
-     Navigator.of(context).push(MaterialPageRoute<Null>(builder: (BuildContext context) {
-                  return new Home();
-                }));
-  }
 
 	@override
 	Widget build(BuildContext context) {
@@ -36,8 +31,8 @@ class _InfoPageState extends State<InfoPage> {
                     children: <Widget>[backgroundHeader()],
                   ),
                   SizedBox(height: 10),                  
-                  cardList('PENGUMUMAN', _gotoFormPage, context),
-                  cardList('DATA WARGA', _gotoFormPage, context),
+                  cardList('PENGUMUMAN', "pengumuman", context),
+                  cardList('DATA WARGA', "data_warga", context),
                 ],
               ),
             ),
@@ -51,12 +46,7 @@ class _InfoPageState extends State<InfoPage> {
 
 Widget backgroundHeader() {
   return Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [Colors.green[100], Colors.green[200] ]),
-    ),    
+    color: Colors.green[300],
     height: 90,
     width: double.infinity,    
     child: Padding(
@@ -76,9 +66,9 @@ Widget backgroundHeader() {
   );
 }
 
-Widget cardList(title, _onTap, context) {
+Widget cardList(title, page, context) {
   return Card(    
-    color: Colors.green[50],
+    color: Colors.green[100],
     margin: EdgeInsets.only(top: 10, left: 20, right: 20),
     elevation: 10,
     child: ListTile(  
@@ -88,8 +78,11 @@ Widget cardList(title, _onTap, context) {
       ),
       trailing: Icon(Icons.chevron_right, size: 26,),
       onTap: () {  
-        print("TAPINGGGGGGGGGG....");
-        _onTap();
+        if (page == "pengumuman"){
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanPage()));  
+        }else if(page == "data_warga"){
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanPage()));
+        }
       }
     ),
   );

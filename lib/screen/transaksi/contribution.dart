@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:puri_ayana_gempol/menu.dart';
@@ -7,6 +9,9 @@ import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/tap_bounce_container.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class ContributionPage extends StatefulWidget {
   final String from;
@@ -33,29 +38,48 @@ class _ContributionPageState extends State<ContributionPage> {
   }
 
   getContributions() async {
-    _contributionList.clear();
-    final response = await http.get(NetworkURL.contributions(), 
-    headers: <String, String>{ 
-      'Content-Type': 'application/json; charset=UTF-8', 
-      'access-token': accessToken,
-      'expiry': expiry,
-      'uid': uid,
-      'client': client,
-      'token-type': "Bearer"
-    });
+    try{
+      _contributionList.clear();
+      final response = await http.get(NetworkURL.contributions(), 
+      headers: <String, String>{ 
+        'Content-Type': 'application/json; charset=UTF-8', 
+        'access-token': accessToken,
+        'expiry': expiry,
+        'uid': uid,
+        'client': client,
+        'token-type': "Bearer"
+      });
+      
+      final responJson = json.decode(response.body);
+      if(responJson["success"] == true){
+        final data = responJson["contributions"];
+        setState(() {
+          title = responJson["title"];
+          tagihan = responJson["tagihan"];
+          for (Map i in data) {
+            _contributionList.add(ContributionModel.fromJson(i));
+          }          
+        });      
+      }else{
+      }  
+
+    } on SocketException {
+      print("ERROR.........");
+      showTopSnackBar( context,
+        CustomSnackBar.error(message: "No Internet connection!"),
+      );
+    } catch (e) {
+      print("ERROR.........");
+      print(e);
+      showTopSnackBar( context,
+        CustomSnackBar.error(message: "Error connection with server!"),
+      );
+    }
     
-    final responJson = json.decode(response.body);
-    if(responJson["success"] == true){
-      final data = responJson["contributions"];
-      setState(() {
-        title = responJson["title"];
-        tagihan = responJson["tagihan"];
-        for (Map i in data) {
-          _contributionList.add(ContributionModel.fromJson(i));
-        }          
-      });      
-    }else{
-    }  
+  }
+
+  Future<void> onRefresh() async {
+    getPref();
   }
  
   @override
@@ -68,42 +92,45 @@ class _ContributionPageState extends State<ContributionPage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: Container(          
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Expanded(
-                child: ListView(
-                  padding: EdgeInsets.all(16),
-                  children: <Widget>[
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          InkWell(
-                          onTap: () {
-                            if (widget.from == "home"){
-                              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
-                            }else{
-                              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
-                            }
-                          },
-                          child: Icon(Icons.arrow_back, size: 30,),
-                          ),
-                          SizedBox(width: 4, ),
-                          Text(
-                            "KONTRIBUSI",                              
-                            style: TextStyle(fontSize: 20, fontFamily: "mon" ),
-                          ),
-                        ],
+        body: Container(    
+          child: RefreshIndicator(
+            onRefresh: onRefresh,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.all(16),
+                    children: <Widget>[
+                      Container(
+                        child: Row(
+                          children: <Widget>[
+                            InkWell(
+                            onTap: () {
+                              if (widget.from == "home"){
+                                Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
+                              }else{
+                                Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
+                              }
+                            },
+                            child: Icon(Icons.arrow_back, size: 30,),
+                            ),
+                            SizedBox(width: 4, ),
+                            Text(
+                              "KONTRIBUSI",                              
+                              style: TextStyle(fontSize: 20, fontFamily: "mon" ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 20,),
-                    backgroundHeader(title, tagihan), 
-                    _getBodyWidget(),                   
-                  ],
+                      SizedBox(height: 20,),
+                      backgroundHeader(title, tagihan), 
+                      _getBodyWidget(),                   
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         )
         

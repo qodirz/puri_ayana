@@ -345,7 +345,7 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
         width: double.infinity,         
         child: CustomButton(
           "loading...",
-          color: Colors.cyan,
+          color: Colors.green,
         ),
       );
     }else{
@@ -359,7 +359,7 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
           },
           child: CustomButton(
             "simpan",
-            color: Colors.cyan,
+            color: Colors.green,
           ),
         ),
         

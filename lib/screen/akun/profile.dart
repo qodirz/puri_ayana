@@ -12,21 +12,26 @@ import 'package:path/path.dart' as path;
 import 'package:async/async.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:form_field_validator/form_field_validator.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/tap_bounce_container.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+class _ProfilePageState extends State<ProfilePage> {  
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
   UserModel userModel;
   String accessToken, uid, expiry, client, email, name, phoneNumber, picBlok, avatar;
   int role, addressId;
-  
+  final emailValidator = RequiredValidator(errorText: 'Email harus di isi!');  
+  final nameValidator = RequiredValidator(errorText: 'Nama harus di isi!');  
+  final phoneValidator = RequiredValidator(errorText: 'Telpon harus di isi!');  
   final _key = GlobalKey<FormState>();
   var obSecureCurrentPwd = true;
   var obSecurePwd = true;
@@ -144,11 +149,17 @@ class _ProfilePageState extends State<ProfilePage> {
             emailController.text = userModel.email;
             nameController.text = userModel.name;
             phoneNumberController.text = userModel.phoneNumber; 
-          });          
-          _scaffoldKey.currentState.showSnackBar(new SnackBar(content: new Text(data['message'])));          
+          });
+                   
+          showTopSnackBar( context,
+            CustomSnackBar.success(message: data['message']),
+          );        
         } else {
-          _scaffoldKey.currentState.showSnackBar(new SnackBar(content: new Text(data['message'])));                    
+          showTopSnackBar( context,
+            CustomSnackBar.error(message: data['message']),
+          );                   
         }
+        
       });
       Navigator.pop(context);    
   }
@@ -178,7 +189,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        key: _scaffoldKey,
         body: Container(          
           child: Form(
             key: _key,
@@ -247,8 +257,9 @@ class _ProfilePageState extends State<ProfilePage> {
                         height: 40,
                       ),
                       TextFormField(                        
+                        validator: emailValidator,
                         controller: emailController,
-                        decoration: InputDecoration(                          
+                        decoration: InputDecoration( 
                           contentPadding: EdgeInsets.symmetric(horizontal: 20),
                           filled: true,
                           fillColor: Colors.white,
@@ -265,12 +276,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             borderRadius: new BorderRadius.circular(16.0),
                             borderSide: BorderSide(color: Colors.green)
                           ),
+                          errorStyle: TextStyle(color: Colors.red),
                         ),
                       ),
                       SizedBox(
                         height: 16,
                       ),
-                      TextFormField(                        
+                      TextFormField(
+                        validator: nameValidator,         
                         controller: nameController,
                         decoration: InputDecoration(
                           contentPadding: EdgeInsets.symmetric(horizontal: 20),
@@ -289,12 +302,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             borderRadius: new BorderRadius.circular(16.0),
                             borderSide: BorderSide(color: Colors.green)
                           ),
+                          errorStyle: TextStyle(color: Colors.red),
                         ),
                       ),
                       SizedBox(
                         height: 16,
                       ),
-                      TextFormField(                    
+                      TextFormField(
+                        validator: phoneValidator,                    
                         keyboardType: TextInputType.number,    
                         controller: phoneNumberController,
                         decoration: InputDecoration(
@@ -314,6 +329,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             borderRadius: new BorderRadius.circular(16.0),
                             borderSide: BorderSide(color: Colors.green)
                           ),
+                          errorStyle: TextStyle(color: Colors.red),
                         ),
                       ),
                       SizedBox(

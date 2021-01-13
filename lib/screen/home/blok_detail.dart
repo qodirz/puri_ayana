@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:puri_ayana_gempol/menu.dart';
@@ -7,6 +8,9 @@ import 'package:puri_ayana_gempol/model/userModel.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/tap_bounce_container.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class BlokDetailPage extends StatefulWidget {
   final String blok;
@@ -33,31 +37,49 @@ class _BlokDetailPagePageState extends State<BlokDetailPage> {
   }
 
   getBlokInfo() async {
-    _userList.clear();
-    final response = await http.get(NetworkURL.blockDetail(widget.blok), 
-    headers: <String, String>{ 
-      'Content-Type': 'application/json; charset=UTF-8', 
-      'access-token': accessToken,
-      'expiry': expiry,
-      'uid': uid,
-      'client': client,
-      'token-type': "Bearer"
-    });
+    try {
+      _userList.clear();
+      final response = await http.get(NetworkURL.blockDetail(widget.blok), 
+      headers: <String, String>{ 
+        'Content-Type': 'application/json; charset=UTF-8', 
+        'access-token': accessToken,
+        'expiry': expiry,
+        'uid': uid,
+        'client': client,
+        'token-type': "Bearer"
+      });
+      
+      final responJson = json.decode(response.body);
+      if(responJson["success"] == true){
+        final data = responJson["users"];
+        setState(() {
+          contribution = double.parse(responJson["address"]["contribution"]);
+          tagihan = responJson["tagihan"].toString();
+          for (Map i in data) {
+            _userList.add(UserModel.fromJson(i));
+          }          
+        });      
+      }else{
+      }  
+    } on SocketException {
+      print("ERROR.........");
+      showTopSnackBar( context,
+        CustomSnackBar.error(message: "No Internet connection!"),
+      );
+    } catch (e) {
+      print("ERROR.........");
+      print(e);
+      showTopSnackBar( context,
+        CustomSnackBar.error(message: "Error connection with server!"),
+      );
+    }
     
-    final responJson = json.decode(response.body);
-    if(responJson["success"] == true){
-      final data = responJson["users"];
-      setState(() {
-        contribution = double.parse(responJson["address"]["contribution"]);
-        tagihan = responJson["tagihan"].toString();
-        for (Map i in data) {
-          _userList.add(UserModel.fromJson(i));
-        }          
-      });      
-    }else{
-    }  
   }
  
+  Future<void> onRefresh() async {
+    getPref();
+  }
+
   @override
   void initState() {
     getPref();
@@ -66,9 +88,11 @@ class _BlokDetailPagePageState extends State<BlokDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(          
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(    
+        child: RefreshIndicator(
+          onRefresh: onRefresh,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
@@ -106,10 +130,10 @@ class _BlokDetailPagePageState extends State<BlokDetailPage> {
               ),
             ],
           ),
-        )
-        
-      )
+        ),
+      ),
     );
+    
   }
 
   Widget _getBodyWidget() {

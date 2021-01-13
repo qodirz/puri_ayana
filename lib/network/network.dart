@@ -60,6 +60,10 @@ class NetworkURL {
   static String pengumuman(){
     return "$server/api/v1/notifications";
   }
+
+  static String pengumumanDetail(int id){
+    return "$server/api/v1/notifications/$id";
+  }
   
   
 }

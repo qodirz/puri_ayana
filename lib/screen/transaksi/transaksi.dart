@@ -4,6 +4,7 @@ import 'package:puri_ayana_gempol/screen/transaksi/cashflow_pertahun.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/contribution.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/iuran_bulanan.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/tambah_transaksi.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TransaksiPage extends StatefulWidget {
 	@override
@@ -13,7 +14,14 @@ class TransaksiPage extends StatefulWidget {
 }
 
 class _TransaksiPageState extends State<TransaksiPage> {
-	GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+	int role;
+
+  getPref() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      role = pref.getInt("role");
+    }); 
+  }
 	
   _gotoPage(){
      Navigator.of(context).push(MaterialPageRoute<Null>(builder: (BuildContext context) {
@@ -21,11 +29,15 @@ class _TransaksiPageState extends State<TransaksiPage> {
                 }));
   }
 
+  @override
+  void initState() {
+    super.initState();
+    getPref();    
+  }
 	@override
 	Widget build(BuildContext context) {
 		return new Scaffold(
-      resizeToAvoidBottomInset: false, 
-			key: _scaffoldKey,
+      resizeToAvoidBottomInset: false,			
       body: new Container(
         child: ListView(
           children: <Widget>[
@@ -47,8 +59,8 @@ class _TransaksiPageState extends State<TransaksiPage> {
                         cardList('TRANSAKSI BULANAN', _gotoPage, context),
                         cardList('DATA IURAN', "data_iuran", context),
                         cardList('HUTANG', "hutang", context),
-                        cardList('BAYAR IURAN BULANAN', "iuran_bulanan", context),
-                        cardList('TAMBAH TRANSAKSI', "tambah_transaksi", context),
+                        if(role == 2) cardList('BAYAR IURAN BULANAN', "iuran_bulanan", context),
+                        if(role == 2) cardList('TAMBAH TRANSAKSI', "tambah_transaksi", context),
                       ],
                     ),
                   ),
@@ -68,12 +80,7 @@ class _TransaksiPageState extends State<TransaksiPage> {
 
 Widget backgroundHeader() {
   return Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [Colors.green[100], Colors.green[200] ]),
-    ),    
+    color: Colors.green[300],    
     height: 90,
     width: double.infinity,
     child: Padding(
@@ -95,7 +102,7 @@ Widget backgroundHeader() {
 
 Widget cardList(title, page, context) {
   return Card(    
-    color: Colors.green[50],
+    color: Colors.green[100],
     margin: EdgeInsets.only(top: 10, left: 20, right: 20),
     elevation: 10,
     child: ListTile(  

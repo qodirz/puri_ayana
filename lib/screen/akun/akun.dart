@@ -18,7 +18,7 @@ class _AkunPageState extends State<AkunPage> {
 	GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   TextEditingController emailController = TextEditingController();
   String accessToken, uid, expiry, client, name, phoneNumber, picBlok;
-  int role, addressId;
+  int role;
   
   getPref() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -31,7 +31,6 @@ class _AkunPageState extends State<AkunPage> {
       name = pref.getString("name");
       phoneNumber = pref.getString("phoneNumber");
       role = pref.getInt("role");
-      addressId = pref.getInt("addressId");
       picBlok = pref.getString("picBlok");
     }); 
   }
@@ -139,7 +138,7 @@ class _AkunPageState extends State<AkunPage> {
                   cardList('UBAH PASSWORD', "update_password", true, context),
                   if(role == 2) cardList('BUAT USER BARU', "new_user", true, context),
                   Card(    
-                    color: Colors.red[200],
+                    color: Colors.red,
                     margin: EdgeInsets.only(top: 10, left: 20, right: 20),
                     elevation: 10,
                     child: ListTile(  
@@ -164,12 +163,7 @@ class _AkunPageState extends State<AkunPage> {
 
 Widget backgroundHeader() {
   return Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [Colors.green[100], Colors.green[200] ]),
-    ),
+    color: Colors.green[300],
     height: 90,
     width: double.infinity,
     child: Padding(
@@ -191,7 +185,7 @@ Widget backgroundHeader() {
 
 Widget cardList(title, page, trailing, context) {
   return Card(    
-    color: Colors.green[50],
+    color: Colors.green[100],
     margin: EdgeInsets.only(top: 10, left: 20, right: 20),
     elevation: 10,
     child: ListTile(  

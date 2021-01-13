@@ -18,7 +18,9 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
 
   String accessToken, uid, expiry, client, title, cashflowYear; 
   dynamic totalCashIn = 0; 
-  dynamic totalCashOut = 0, grandTotal = 0;  
+  dynamic totalCashOut = 0;
+  dynamic grandTotal = 0;
+  bool isLoading = false;
   
   getPref() async {
     var date = new DateTime.now().toString(); 
@@ -53,6 +55,7 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
     if(responJson["success"] == true){
       final data = responJson["cash_flows"];
       setState(() {
+        isLoading = false;
         title = responJson["title"];
         totalCashIn = responJson["total_cash_in"];
         totalCashOut = responJson["total_cash_out"];
@@ -122,41 +125,52 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
   }
 
   Widget _dataTableWidget() {
-    if(totalCashIn == 0){
+    if(isLoading == true){
       return Container(      
         height: 100,
         color: Colors.green[50],
         child: Center(
-          child: Text("NO DATA", style: TextStyle(fontFamily: "mon"),),
+          child: CircularProgressIndicator(
+            backgroundColor: Colors.white,
+          )
         )
-      );  
-    }else{
-      return Container(      
-        height: (MediaQuery.of(context).size.height - 350),
-        child: HorizontalDataTable(
-          leftHandSideColumnWidth: 50,
-          rightHandSideColumnWidth: 550,
-          isFixedHeader: true,
-          headerWidgets: _getTitleWidget(),
-          leftSideItemBuilder: _generateFirstColumnRow,
-          rightSideItemBuilder: _generateRightHandSideColumnRow,
-          itemCount: _cashflowList.length,
-          rowSeparatorWidget: const Divider(
-            color: Colors.cyan,
-            height: 1.0,
-            thickness: 1.0,
-          ),
-          leftHandSideColBackgroundColor: Colors.green[50],
-          rightHandSideColBackgroundColor: Colors.green[50],
-        ),      
       );
+    }else{
+      if(totalCashIn == 0){
+        return Container(      
+          height: 100,
+          color: Colors.green[50],
+          child: Center(
+            child: Text("NO DATA", style: TextStyle(fontFamily: "mon"),),
+          )
+        );  
+      }else{
+        return Container(      
+          height: (MediaQuery.of(context).size.height - 350),
+          child: HorizontalDataTable(
+            leftHandSideColumnWidth: 100,
+            rightHandSideColumnWidth: 450,
+            isFixedHeader: true,
+            headerWidgets: _getTitleWidget(),
+            leftSideItemBuilder: _generateFirstColumnRow,
+            rightSideItemBuilder: _generateRightHandSideColumnRow,
+            itemCount: _cashflowList.length,
+            rowSeparatorWidget: const Divider(
+              color: Colors.cyan,
+              height: 1.0,
+              thickness: 1.0,
+            ),
+            leftHandSideColBackgroundColor: Colors.green[50],
+            rightHandSideColBackgroundColor: Colors.green[50],
+          ),      
+        );
+      }
     }
     
   }
 
   List<Widget> _getTitleWidget() {
     return [      
-      _getTitleItemWidget('No', 50),
       _getTitleItemWidget('Bulan', 100),      
       _getTitleItemWidget('Cash In', 150),
       _getTitleItemWidget('Cash Out', 150),
@@ -176,7 +190,7 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
 
   Widget _generateFirstColumnRow(BuildContext context, int index) {
     return Container(
-      child: Text((index + 1).toString()),
+      child: Text(_cashflowList[index].month.toString()),
       width: 50,
       height: 52,
       padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
@@ -186,14 +200,7 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
 
   Widget _generateRightHandSideColumnRow(BuildContext context, int index) {
     return Row(
-      children: <Widget>[
-        Container(
-          child: Text(_cashflowList[index].month.toString()),
-          width: 100,
-          height: 52,
-          padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-          alignment: Alignment.centerLeft,
-        ),
+      children: <Widget>[       
         Container(
           child: Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_cashflowList[index].cashIn)),
           width: 150,
@@ -271,7 +278,7 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
                 color: Colors.teal[400],
                 child: Align(
                   alignment: Alignment.center,
-                  child: totalCashIn < 0 ? Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(grandTotal), style: TextStyle(color: Colors.red[100], fontWeight: FontWeight.bold, fontSize: 20, fontFamily: "mon")) : 
+                  child: grandTotal < 0 ? Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(grandTotal), style: TextStyle(color: Colors.red[200], fontWeight: FontWeight.bold, fontSize: 20, fontFamily: "mon")) : 
                   Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(grandTotal), style: TextStyle(color: Colors.yellowAccent, fontWeight: FontWeight.bold, fontSize: 20, fontFamily: "mon")), 
                 ),
               ),
@@ -315,6 +322,7 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
                     int year = int.parse(cashflowYear) - 1;
                     setState(() {
                       cashflowYear = year.toString();
+                      isLoading = true;
                     });                    
                     getCashFlows(year.toString());
                   },
@@ -330,6 +338,7 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
                     int year = int.parse(cashflowYear) + 1;
                     setState(() {
                       cashflowYear = year.toString();
+                      isLoading = true;
                     });                    
                     getCashFlows(year.toString());
                   },
