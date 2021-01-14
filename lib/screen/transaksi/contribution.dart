@@ -51,6 +51,8 @@ class _ContributionPageState extends State<ContributionPage> {
       });
       
       final responJson = json.decode(response.body);
+      print("getContributions");
+      print(responJson);
       if(responJson["success"] == true){
         final data = responJson["contributions"];
         setState(() {

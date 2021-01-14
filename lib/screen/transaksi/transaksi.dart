@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:puri_ayana_gempol/screen/home/home.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/cashflow_pertahun.dart';
+import 'package:puri_ayana_gempol/screen/transaksi/cicilan.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/contribution.dart';
+import 'package:puri_ayana_gempol/screen/transaksi/hutang.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/iuran_bulanan.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/tambah_transaksi.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,10 +59,11 @@ class _TransaksiPageState extends State<TransaksiPage> {
                       children: <Widget>[
                         cardList('CASHFLOW PERTAHUN', "cashflow", context),
                         cardList('TRANSAKSI BULANAN', _gotoPage, context),
-                        cardList('DATA IURAN', "data_iuran", context),
+                        if (role != 3) cardList('DATA IURAN', "data_iuran", context),
                         cardList('HUTANG', "hutang", context),
-                        if(role == 2) cardList('BAYAR IURAN BULANAN', "iuran_bulanan", context),
-                        if(role == 2) cardList('TAMBAH TRANSAKSI', "tambah_transaksi", context),
+                        cardList('CICILAN', "cicilan", context),
+                        if (role == 2 || role == 3) cardList('BAYAR IURAN BULANAN', "iuran_bulanan", context),
+                        if (role == 2 || role == 3) cardList('TAMBAH TRANSAKSI', "tambah_transaksi", context),
                       ],
                     ),
                   ),
@@ -118,7 +121,9 @@ Widget cardList(title, page, context) {
         }else if (page == "data_iuran"){
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ContributionPage()));
         }else if (page == "hutang"){
-          
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HutangPage()));
+        }else if (page == "cicilan"){
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CicilanPage()));
         }else if (page == "iuran_bulanan"){
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => IuranBulananPage()));
         }else if (page == "tambah_transaksi"){

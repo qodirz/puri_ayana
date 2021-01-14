@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/screen/home/blok_detail.dart';
-import 'package:puri_ayana_gempol/screen/info/pengumuman.dart';
+import 'package:puri_ayana_gempol/screen/info/pengumuman_detail.dart';
 import 'package:puri_ayana_gempol/screen/login.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/contribution.dart';
 import 'package:puri_ayana_gempol/custom/colored_card.dart';
@@ -22,7 +22,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {  
   String accessToken, uid, expiry, client, greetingMes, name;
-  int notifID;
+  int notifID, role;
   String notifTitle, notifDescription; 
   String bulan = "";
   String blok = "";
@@ -30,6 +30,7 @@ class _HomeState extends State<Home> {
   dynamic pemasukan = 0, pengeluaran = 0, total = 0;
   final firebaseMessaging = FirebaseMessaging();
   String token = '';
+  List _pengumumanList = [];
   
   getPref() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -38,7 +39,8 @@ class _HomeState extends State<Home> {
       uid = pref.getString("uid");
       expiry = pref.getString("expiry");
       client = pref.getString("client");     
-      name = pref.getString("name");     
+      name = pref.getString("name");
+      role = pref.getInt("role");
     });
 
     getHome();
@@ -46,7 +48,8 @@ class _HomeState extends State<Home> {
 
   getHome() async {
     print("masuk ke home yah");
-    try {
+    //try {
+      _pengumumanList.clear();
       final response = await http.get(NetworkURL.homePage(), 
       headers: <String, String>{ 
         'Content-Type': 'application/json; charset=UTF-8', 
@@ -58,19 +61,20 @@ class _HomeState extends State<Home> {
       });
     
       final responJson = json.decode(response.body);
-      print(responJson);
+      debugPrint(responJson.toString());
+      print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
       if(responJson["success"] == true){
         setState(() {
           blok = responJson['blok'];
-          tagihan = responJson['tagihan'];
+          tagihan = responJson['tagihan'] == null ? 0 : responJson['tagihan'];
           bulan = responJson['cash_flow']['month'];
           tahun = responJson['cash_flow']['year'];
           pemasukan = responJson['cash_flow']['pemasukan'];
           pengeluaran = responJson['cash_flow']['pengeluaran'];
           total = pemasukan - pengeluaran;
-          notifID = responJson['information']['id'];
-          notifTitle = responJson['information']['title'];
-          notifDescription = responJson['information']['notif'];
+          for (Map i in responJson["notifications"]) {
+            _pengumumanList.add( [i["notification"]["id"], i["notification"]["title"], i["notification"]["notif"], i["is_read"]] );            
+          }
         });
       }else{
         //error, user harus login ulang
@@ -79,21 +83,22 @@ class _HomeState extends State<Home> {
         Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Login()), 
         (Route<dynamic> route) => false);  
       }    
-    } on SocketException {
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "No Internet connection!"),
-      );
-    } catch (e) {
-      print("ERROR.........");
-      print(e);
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "Error connection with server!"),
-      );
-    }
+    // } on SocketException {
+    //   showTopSnackBar( context,
+    //     CustomSnackBar.error(message: "No Internet connection!"),
+    //   );
+    // } catch (e) {
+    //   print("ERROR.........");
+    //   print(e);
+    //   showTopSnackBar( context,
+    //     CustomSnackBar.error(message: "Error connection with server!"),
+    //   );
+    // }
     
   }
   
   Future<void> onRefresh() async {
+    _pengumumanList.clear();    
     getPref();
   }
 
@@ -101,22 +106,18 @@ class _HomeState extends State<Home> {
     debugPrint('onBackgroundMessage: $message');   
     return null;
   }
-
+  
   void _serialiseAndNavigate(Map<String, dynamic> message) {
     print("_serialiseAndNavigate");
     var notificationData = message['data'];
-    var view = notificationData['view'];
-    print(message);
     print(notificationData);
-
-    //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanPage(from: "home")));
-    if (view != null) {
-      // Navigate to the specific page view
-      if (view == 'Home') {
-       // Call the view method in the notification data
-        //Get.to(Home()); // Use the Get Package
-      }
-    
+    if (notificationData["notif_id"] != null) {
+      final data = Data(
+        pengumumanID: int.parse(notificationData["notif_id"]),
+        from: "xxx"
+      );
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanDetailPage(data)));
+      //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanDetailPage(int.parse(notificationData["notif_id"]))));
     }
   }
 
@@ -124,16 +125,17 @@ class _HomeState extends State<Home> {
   void initState() {
     firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        _serialiseAndNavigate(message);
         debugPrint('onMessage: $message');
+        showTopSnackBar( context,
+          CustomSnackBar.info(message: message["notification"]["title"]),
+        );
       },
       onBackgroundMessage: onBackgroundMessage,
       onResume: (Map<String, dynamic> message) async {
-        _serialiseAndNavigate(message);
         debugPrint('onResume: $message');
+        _serialiseAndNavigate(message);        
       },
       onLaunch: (Map<String, dynamic> message) async {
-        _serialiseAndNavigate(message);
         debugPrint('onLaunch: $message');
       },
     );
@@ -141,7 +143,7 @@ class _HomeState extends State<Home> {
       const IosNotificationSettings(sound: true, badge: true, alert: true, provisional: true),
     );
     firebaseMessaging.onIosSettingsRegistered.listen((settings) {
-      debugPrint('Settings registered: $settings');
+      print('Settings registered: $settings');
     });
     super.initState();
     getPref();
@@ -162,220 +164,237 @@ class _HomeState extends State<Home> {
   
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: onRefresh,
-          child: Container(                        
-            padding: EdgeInsets.all(20.0),
-            child: Column(
-              children: <Widget>[
-                ColoredCard(
-                  padding: 2,
-                  headerColor: Color(0xFF6078dc),
-                  footerColor: Color(0xFF6078dc),
-                  cardHeight: 140,
-                  elevation: 4,
-                  bodyColor: Color(0xFF6c8df6),
-                  showFooter: false,
-                  showHeader: false,
-                  bodyGradient: LinearGradient(
-                    colors: [
-                      Colors.green[100],
-                      Colors.green,
-                      Colors.green[200],
-                    ],
-                    begin: Alignment.bottomLeft,
-                    end: Alignment.topRight,
-                    stops: [0, 0.2, 1],
-                  ),
-                  bodyContent: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 20.0,
-                      top: 30,
-                      right: 30,
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.all(16),
+                children: <Widget>[
+                  ColoredCard(
+                    padding: 2,
+                    headerColor: Color(0xFF6078dc),
+                    footerColor: Color(0xFF6078dc),
+                    cardHeight: 140,
+                    elevation: 4,
+                    bodyColor: Color(0xFF6c8df6),
+                    showFooter: false,
+                    showHeader: false,
+                    bodyGradient: LinearGradient(
+                      colors: [
+                        Colors.green[100],
+                        Colors.green,
+                        Colors.green[200],
+                      ],
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight,
+                      stops: [0, 0.2, 1],
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          "Hi $name",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              fontFamily: "mon"),
-                        ),
-                        SizedBox(
-                          height: 30,
-                        ),
-                        Text(
-                          "$greetingMes",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontFamily: "mon",
-                            fontSize: 16,
+                    bodyContent: Padding(
+                      padding: const EdgeInsets.only(
+                        left: 20.0,
+                        top: 30,
+                        right: 30,
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            "Hi $name",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                fontFamily: "mon"),
                           ),
-                        ),
-                      ],
+                          SizedBox(
+                            height: 30,
+                          ),
+                          Text(
+                            "$greetingMes",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: "mon",
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 20,),
-                Expanded(
-                  flex: 0,
-                  child: Container(
-                    height: 165,                    
-                    child: GridView.count(                        
-                      childAspectRatio: 1,
-                      crossAxisCount: 2,
-                      children: <Widget>[                     
-                        Card(
-                          color: Colors.green[100],
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BlokDetailPage(blok)));
-                            },
-                            child: Padding( 
-                              padding: EdgeInsets.all(10),
-                                child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Text( "Blok anda", style: TextStyle( color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon"), textAlign: TextAlign.left,),
-                                  SizedBox(height: 20),
-                                  Center(
-                                    child: blok == "" ?
-                                    CircularProgressIndicator(backgroundColor: Colors.white, ) :
-                                    Text( "$blok", style: TextStyle( color: Colors.black, fontSize: 50, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                                  ),
-                                ],
-                              )
-                            )
-                          )
-                        ),
-                        Card(         
-                          color: Colors.green[100],
-                          child: InkWell(
-                            onTap: () {
-                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ContributionPage(from: "home")));
-                            },
-                            child: Padding( 
-                              padding: EdgeInsets.all(10),
-                                child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,                              
-                                children: <Widget>[
-                                  Text( "Tagihan anda", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, fontFamily: "mon" ), textAlign: TextAlign.left,),
-                                  SizedBox(height: 20),
-                                  Center(
-                                    child: tagihan == null ?
-                                    CircularProgressIndicator(backgroundColor: Colors.white, ) :
-                                    Text("$tagihan", style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                                  ),
-                                  Center(
-                                    child: Text( "kali", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                                  ),
-                                ],
-                              )
-                            )
-                          )
-                        ),
-                      ],
+                  SizedBox(height: 5,),
+                  if(role != 3) Card(
+                    color: Colors.green[100],
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BlokDetailPage(blok)));
+                      },
+                      child: Padding( 
+                        padding: EdgeInsets.all(10),
+                          child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text( "Blok anda", style: TextStyle( color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon"), textAlign: TextAlign.left,),
+                            Center(
+                              child: blok == "" ?
+                              CircularProgressIndicator(backgroundColor: Colors.white, ) :
+                              Text( "$blok", style: TextStyle( color: Colors.black, fontSize: 40, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
+                            ),
+                          ],
+                        )
+                      )
                     )
-                  )
-                  
-                ),
-                SizedBox(height: 6,),
-                Expanded(                                       
-                  child: GridView.count(    
-                    childAspectRatio: 2,
-                    crossAxisCount: 1,
-                    mainAxisSpacing: 2,
-                    children: <Widget>[                     
-                      Card(                                       
-                        color: Colors.green[100],
-                        child: InkWell(
-                          onTap: () {
-                              print("tapping info");
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 5, left: 20, right: 20),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  ),
+                  if(role != 3) Card(         
+                    color: Colors.green[100],
+                    child: InkWell(
+                      onTap: () {
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ContributionPage(from: "home")));
+                      },
+                      child: Padding( 
+                        padding: EdgeInsets.all(10),
+                          child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,                              
+                          children: <Widget>[
+                            Text( "Tagihan anda", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon" ), textAlign: TextAlign.left,),
+                            Center(
+                              child: tagihan == null ?
+                              CircularProgressIndicator(backgroundColor: Colors.white, ) :
+                              Text("$tagihan", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
+                            ),
+                            Center(
+                              child: Text( "kali", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
+                            ),
+                          ],
+                        )
+                      )
+                    )
+                  ),
+                  Card(                                       
+                    color: Colors.green[100],
+                    child: InkWell(
+                      onTap: () {
+                          print("tapping info");
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            Text( "Cash flow $bulan $tahun", style: TextStyle( fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
+                            SizedBox(height: 5),
+                            Row(
                               children: <Widget>[
-                                Text( "Cash flow $bulan $tahun", style: TextStyle( fontSize: 13, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                                Row(
+                                Column(
                                   children: <Widget>[
-                                    Column(
-                                      children: <Widget>[
-                                        Text("Pemasukan",style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                                        Text(
-                                          NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(pemasukan),
-                                          style: TextStyle( fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon" ),
-                                        ),
-                                      ],
-                                    ),
-                                    Spacer(flex: 1,),
-                                    Column(
-                                      children: <Widget>[
-                                        Text("Pengeluaran",style: TextStyle( fontSize: 14, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                                        Text(
-                                          NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(pengeluaran),
-                                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon" ),
-                                        ),
-                                      ],
+                                    Text("Pemasukan",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "mon" ),),
+                                    Text(
+                                      NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(pemasukan),
+                                      style: TextStyle( fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon" ),
                                     ),
                                   ],
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    Text("TOTAL", style: TextStyle( fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
+                                Spacer(flex: 1,),
+                                Column(
+                                  children: <Widget>[
+                                    Text("Pengeluaran",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "mon" ),),
                                     Text(
-                                      NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(total), 
-                                      style: TextStyle(
-                                        fontSize: 16, 
-                                        fontWeight: FontWeight.bold, 
-                                        fontFamily: "mon", 
-                                        color: (total < 0) ? Colors.red : Colors.blue 
-                                      ), 
+                                      NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(pengeluaran),
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon" ),
                                     ),
-                                ],)
+                                  ],
+                                ),
                               ],
-                            )
-                          )
-                          
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Text("TOTAL", style: TextStyle( fontSize: 18, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
+                                Text(
+                                  NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(total), 
+                                  style: TextStyle(
+                                    fontSize: 18, 
+                                    fontWeight: FontWeight.bold, 
+                                    fontFamily: "mon", 
+                                    color: (total < 0) ? Colors.red : Colors.blue 
+                                  ), 
+                                ),
+                            ],)
+                          ],
                         )
+                      )
+                      
+                    )
+                  ),
+                  Card(
+                    color: Colors.green[100],
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BlokDetailPage(blok)));
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text( "Pengumuman", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "mon" )),
+                            SizedBox(height: 10),
+                            SizedBox(
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: BouncingScrollPhysics(),
+                                itemCount: _pengumumanList.length,
+                                itemBuilder: (BuildContext context, int index){
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      ListTile(
+                                        tileColor: _pengumumanList[index][3] == true ? Colors.green[200] : Colors.green[400],
+                                        title: Text(_pengumumanList[index][1],
+                                          style: TextStyle(fontFamily: "mon", fontWeight: FontWeight.bold),
+                                          overflow: TextOverflow.ellipsis,                                          
+                                        ),
+                                        subtitle: Text(_pengumumanList[index][2],
+                                          style: TextStyle(fontFamily: "mon",),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 2,
+                                        ),
+                                        onTap: () {
+                                          final data = Data(
+                                            pengumumanID: _pengumumanList[index][0],
+                                            from: "home"
+                                          );
+                                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanDetailPage(data)));                                          
+                                        },
+                                      ),
+                                      Divider(), //                           <-- Divider
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                          ],                        
+                        ),
                       ),
-                      Card(         
-                        color: Colors.green[100],
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanPage(from: "home")));                            
-                          },
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              Text( "Pengumuman", style: TextStyle( fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                              Text( notifTitle.toString(), style: TextStyle( fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                            ],
-                          ),
-                        )
-                      ),
-                    ],
-                  )
-                )
-              ],
+                    ),
+                  ),
+                  
+                    
+                ],
+              ),
             ),
-          )
+          ],
         ),
-      ),
+      )
     );
-    
   }
 }
 
-
-
-
-
+class Data {
+  int pengumumanID;
+  String from;
+  Data({this.pengumumanID, this.from});
+}

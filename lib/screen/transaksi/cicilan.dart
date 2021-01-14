@@ -1,26 +1,23 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:puri_ayana_gempol/screen/home/home.dart';
-import 'package:puri_ayana_gempol/screen/info/pengumuman_detail.dart';
+import 'package:puri_ayana_gempol/screen/transaksi/cicilan_detail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/tap_bounce_container.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
-class PengumumanPage extends StatefulWidget {
-  final String from;
-  const PengumumanPage({this.from});
-
+class CicilanPage extends StatefulWidget {
   @override
-  _PengumumanPageState createState() => _PengumumanPageState();
+  _CicilanPageState createState() => _CicilanPageState();
 }
 
-class _PengumumanPageState extends State<PengumumanPage> {
-  List _pengumumanList = [];
+class _CicilanPageState extends State<CicilanPage> {
+  List _listCicilan = [];
   bool isLoading = false;
 
   String accessToken, uid, expiry, client, tagihan; 
@@ -34,13 +31,13 @@ class _PengumumanPageState extends State<PengumumanPage> {
       expiry = pref.getString("expiry");
       client = pref.getString("client");
     });
-    getPengumuman();
+    getCicilan();
   }
 
-  getPengumuman() async {
+  getCicilan() async {
     try{
-      _pengumumanList.clear();
-      final response = await http.get(NetworkURL.pengumuman(), 
+      _listCicilan.clear();
+      final response = await http.get(NetworkURL.cicilan(), 
       headers: <String, String>{ 
         'Content-Type': 'application/json; charset=UTF-8', 
         'access-token': accessToken,
@@ -51,14 +48,14 @@ class _PengumumanPageState extends State<PengumumanPage> {
       });
       
       final responJson = json.decode(response.body);
-      print("getPengumuman");
+      print("getCicilan");
       print(responJson);
       if(responJson["success"] == true){
-        final data = responJson["user_notifications"];
+        final data = responJson["installments"];
         setState(() {
           isLoading = false;
           for (Map i in data) {
-            _pengumumanList.add( [i["notification"]["id"], i["notification"]["title"], i["notification"]["notif"], i["is_read"]] );            
+            _listCicilan.add( [i["id"], i["description"], i["value"], i["total_paid"], i["paid_off"]] );            
           }          
         });      
       }else{
@@ -81,7 +78,7 @@ class _PengumumanPageState extends State<PengumumanPage> {
   }
  
   Future<void> onRefresh() async {
-    _pengumumanList.clear();
+    _listCicilan.clear();
     getPref();
   }
 
@@ -107,11 +104,7 @@ class _PengumumanPageState extends State<PengumumanPage> {
                       children: <Widget>[
                         InkWell(
                         onTap: () {
-                          if (widget.from == "home"){
-                            Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
-                          }else{
-                            Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
-                          }
+                          Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
                         },
                         child: Icon(Icons.arrow_back, size: 30,),
                         ),
@@ -119,7 +112,7 @@ class _PengumumanPageState extends State<PengumumanPage> {
                           width: 4,
                         ),
                         Text(
-                          "PENGUMUMAN",                       
+                          "CICILAN",                       
                           style: TextStyle(
                             fontSize: 20, fontFamily: "mon"
                           ),
@@ -138,41 +131,48 @@ class _PengumumanPageState extends State<PengumumanPage> {
                           backgroundColor: Colors.green,
                         )
                       )
-                    ) : 
-                    ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: _pengumumanList.length,
-                      itemBuilder: (BuildContext context, int index){
-                        return Column(
-                          children: <Widget>[
-                            ListTile(
-                              tileColor: _pengumumanList[index][3] == true ? Colors.green[200] : Colors.green[400],
-                              title: Text(_pengumumanList[index][1],
-                                style: TextStyle(fontFamily: "mon",),
-                                overflow: TextOverflow.ellipsis,                                
+                    ) :
+                    RefreshIndicator(
+                      onRefresh: onRefresh,
+                      child: ListView.builder(
+                        scrollDirection: Axis.vertical,
+                        shrinkWrap: true,
+                        itemCount: _listCicilan.length,
+                        itemBuilder: (BuildContext context, int index){
+                          return Column(
+                            children: <Widget>[
+                              ListTile(
+                                tileColor: Colors.green[100],
+                                title: Text(_listCicilan[index][1].toString(), style: TextStyle(fontFamily: "mon", fontWeight: FontWeight.bold, fontSize: 18)),
+                                isThreeLine: true,
+                                subtitle: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Align(
+                                      alignment: Alignment.topLeft,
+                                      child: Text("Total cicilan : " + NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_listCicilan[index][2]), style: TextStyle(fontFamily: "mon")),
+                                    ),
+                                    SizedBox(height: 2,),
+                                    Align(
+                                      alignment: Alignment.topLeft,
+                                      child: Text("Total bayar   : " + NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_listCicilan[index][3]), style: TextStyle(fontFamily: "mon")),
+                                    ),
+                                    SizedBox(height: 2,),
+                                    Align(
+                                      alignment: Alignment.topLeft,
+                                      child: Text("Status           : " + (_listCicilan[index][4] ? "LUNAS" : "BELUM LUNAS"), style: TextStyle(fontFamily: "mon"),)                                      
+                                    ),
+                                ],),
+                                onTap: () {
+                                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CicilanDetailPage(_listCicilan[index][0]) ));
+                                },
                               ),
-                              subtitle: Text(_pengumumanList[index][2],
-                                style: TextStyle(fontFamily: "mon",),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                              ),
-                              onTap: () {
-                                final data = Data(
-                                  pengumumanID: _pengumumanList[index][0],
-                                  from: "null"
-                                );
-                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanDetailPage(data)));
-                                
-                                //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanDetailPage(_pengumumanList[index][0])));
-                              },
-                            ),
-                            Divider(), //                           <-- Divider
-                          ],
-                        );
-                      },
-                    ),
+                              Divider(), //                           <-- Divider
+                            ],
+                          );
+                        },
+                      ),
+                    )
                     
                 ],
               ),

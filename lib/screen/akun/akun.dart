@@ -130,13 +130,12 @@ class _AkunPageState extends State<AkunPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Stack(
-                    overflow: Overflow.visible,                
                     children: <Widget>[backgroundHeader()],
                   ),
                   SizedBox(height: 10),                  
                   cardList('PROFIL', "profile", true, context),
                   cardList('UBAH PASSWORD', "update_password", true, context),
-                  if(role == 2) cardList('BUAT USER BARU', "new_user", true, context),
+                  if (role == 2 || role == 3) cardList('BUAT USER BARU', "new_user", true, context),
                   Card(    
                     color: Colors.red,
                     margin: EdgeInsets.only(top: 10, left: 20, right: 20),

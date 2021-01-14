@@ -15,15 +15,18 @@ class TambahTransaksiPage extends StatefulWidget {
 }
 
 class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
+  TextEditingController totalController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();  
   String paymentGroupOption = 'IURAN WARGA';
   String paymentOption = 'Cash';  
   DateTime _dateTime;
   
-  String accessToken, uid, expiry, client, blockAddress;
-  String message = "";
+  final totalValidator = RequiredValidator(errorText: 'Total harus di isi!');  
+  final descriptionValidator = RequiredValidator(errorText: 'Description harus di isi!');  
+  
+  String accessToken, uid, expiry, client;
   int selectedPayment = 1;
-  bool loading = false;
-  bool submitted = false;
+  bool isloading = false;
 
   getPref() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -39,17 +42,16 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
 
   cek() {
     if (_key.currentState.validate()) {
-      getBlokInfo();
+      addTransaction();
       setState(() {
-        loading = true;      
+        isloading = true;      
       }); 
     }
   }
 
-  getBlokInfo() async {
-
-    print("masuk search getBlokInfo");
-    final response = await http.get(NetworkURL.getProfile(), 
+  addTransaction() async {
+    print("post addTransaction");
+    final response = await http.post(NetworkURL.addTransaction(), 
     headers: <String, String>{ 
       'Content-Type': 'application/json; charset=UTF-8', 
       'access-token': accessToken,
@@ -57,18 +59,19 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
       'uid': uid,
       'client': client,
       'token-type': "Bearer"
-    });
+    },body: jsonEncode(<String, String>{        
+      "total": totalController.text.trim(), 
+      "description": descriptionController.text.trim(), 
+    }));
     
     final responJson = json.decode(response.body);
     if(responJson["success"] == true){      
       setState(() {
-        loading = false;      
-        message = "";
+        isloading = false;  
       });      
     }else{
       setState(() {
-        loading = false;  
-        message = responJson["message"];       
+        isloading = false;         
       }); 
     }  
   }
@@ -98,33 +101,41 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
                           onTap: () {
                             Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
                           },
-                          child: Icon(Icons.arrow_back),
+                          child: Icon(Icons.arrow_back, size: 30,),
                           ),
                           SizedBox(
                             width: 4,
                           ),
                           Text(
-                            "Tambah Transaksi",                              
+                            "TAMBAH TRANSAKSI",                              
                             style: TextStyle(
-                              fontSize: 16
+                              fontSize: 20, fontFamily: "mon"
                             ),
                           ),
                           
                         ],
                       ),
                     ),
-                    SizedBox(height: 20,),
-                    _transactionDateField(),
-                    SizedBox(height: 10,),
-                    _transactionTypeField(),
-                    SizedBox(height: 10,),
-                    _transactionGroupField(),
-                    SizedBox(height: 10,),
-                    _totalField(),
-                    SizedBox(height: 10,),
-                    _descriptionField(),
-                    SizedBox(height: 10,),
-                    _btnTambahTransaksi(),
+                    Form(
+                      key: _key,
+                      child: Column(
+                        children: [
+                          SizedBox(height: 20,),
+                          _transactionDateField(),
+                          SizedBox(height: 10,),
+                          _transactionTypeField(),
+                          SizedBox(height: 10,),
+                          _transactionGroupField(),
+                          SizedBox(height: 10,),
+                          _totalField(),
+                          SizedBox(height: 10,),
+                          _descriptionField(),
+                          SizedBox(height: 10,),
+                          _btnTambahTransaksi(),
+                        ],
+                      ),
+
+                    ),
                   ],
                 ),
               ),
@@ -146,13 +157,13 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            child: Text("Tanggal", style: TextStyle(fontSize: 16),),
+            child: Text("Tanggal", style: TextStyle(fontFamily: "mon"),),
           ),
           Container(
             child: Row(              
               children: <Widget>[              
               Text(_dateTime == null ? "" : DateFormat('yyyy-MM-dd').format(_dateTime),
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(fontFamily: "mon"),
               ),
               InkWell(
                 onTap: () {
@@ -189,7 +200,7 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            child: Text("Payment type", style: TextStyle(fontSize: 16),),
+            child: Text("Payment type", style: TextStyle(fontFamily: "mon"),),
           ),
           Container(
             child: DropdownButton<String>(
@@ -197,7 +208,7 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
                 icon: Icon(Icons.arrow_drop_down),
                 iconSize: 24,
                 elevation: 16,
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(fontFamily: "mon", color: Colors.black),
                 underline: Container(                    
                   color: Colors.white,
                 ),
@@ -208,14 +219,16 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
                 },
                 selectedItemBuilder: (BuildContext context) {
                   return targetPaymentOptions.map<Widget>((String item) {
-                    return SizedBox(width: 70, child: Align(alignment: Alignment.centerRight, child: Text(item)));
+                    return SizedBox(width: 70, child: Align(alignment: Alignment.centerRight, 
+                      child: Text(item,))
+                    );
                   }).toList();
                 },
                 items: targetPaymentOptions.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Align(
-                      alignment: Alignment.centerRight,
+                      alignment: Alignment.center,
                       child: Text(value),
                     ),
                   );
@@ -239,7 +252,7 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            child: Text("Payment Group", style: TextStyle(fontSize: 16),),
+            child: Text("Payment Group", style: TextStyle(fontFamily: "mon"),),
           ),
           Container(
             child: DropdownButton<String>(              
@@ -247,7 +260,7 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
                 icon: Icon(Icons.arrow_drop_down),
                 iconSize: 24,
                 elevation: 16,
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: Colors.black, fontFamily: "mon"),
                 underline: Container(                    
                   color: Colors.white,
                 ),
@@ -258,14 +271,16 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
                 },
                 selectedItemBuilder: (BuildContext context) {
                   return targetOptions.map<Widget>((String item) {
-                    return SizedBox(width: 150, child: Align(alignment: Alignment.centerRight, child: Text(item)));
+                    return SizedBox(width: 190, child: Align(alignment: Alignment.centerRight, 
+                      child: Text(item,))
+                    );
                   }).toList();
                 },                
                 items: targetOptions.map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Align(
-                    alignment: Alignment.centerRight,
+                    alignment: Alignment.center,
                     child: Text(value),
                   ),
                 );
@@ -287,14 +302,15 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            child: Text("Total", style: TextStyle(fontSize: 16),),
+            child: Text("Total", style: TextStyle(fontFamily: "mon"),),
           ),
           Container(
             width: 150,
-            child: TextFormField(  
+            child: TextFormField( 
+              textAlign: TextAlign.right,
               keyboardType: TextInputType.number,
-              //validator: emailValidator,                      
-              //controller: usernameController,
+              validator: totalValidator,                      
+              controller: totalController,              
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.only(top: 20, left: 20),
                 filled: true,
@@ -303,7 +319,7 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  errorStyle: TextStyle(color: Colors.red[100]),
+                  errorStyle: TextStyle(color: Colors.red),
                 ),
             )
           ),
@@ -321,8 +337,8 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
       child: TextFormField(  
         keyboardType: TextInputType.multiline,
         maxLines: 3,
-        //validator: emailValidator,                      
-        //controller: usernameController,
+        validator: descriptionValidator,
+        controller: descriptionController,              
         decoration: InputDecoration(
           contentPadding: EdgeInsets.only(top: 20, left: 20),
           filled: true,
@@ -332,7 +348,7 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
               borderSide: BorderSide.none,
               borderRadius: BorderRadius.circular(16),
             ),
-            errorStyle: TextStyle(color: Colors.red[100]),
+            errorStyle: TextStyle(color: Colors.red),
           ),
       ),
     );
@@ -340,7 +356,7 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
 
   
   Widget _btnTambahTransaksi() {
-    if(submitted == true){
+    if(isloading == true){
       return Container(
         width: double.infinity,         
         child: CustomButton(
@@ -353,12 +369,10 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
         width: double.infinity,  
         child: InkWell(
           onTap: () {
-            setState(() {
-              submitted = true;
-            });
+            cek();
           },
           child: CustomButton(
-            "simpan",
+            "SIMPAN",
             color: Colors.green,
           ),
         ),

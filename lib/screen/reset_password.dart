@@ -125,7 +125,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                         validator: emailValidator,                     
                         controller: emailController,
                         decoration: InputDecoration(
-                          errorStyle: TextStyle(color: Colors.red[100]),
+                          errorStyle: TextStyle(color: Colors.red),
                           contentPadding: EdgeInsets.symmetric(horizontal: 20),
                           filled: true,
                           fillColor: Colors.white,
@@ -152,7 +152,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                         keyboardType: TextInputType.number,
                         controller: tokenController,
                         decoration: InputDecoration(
-                          errorStyle: TextStyle(color: Colors.red[100]),
+                          errorStyle: TextStyle(color: Colors.red),
                           contentPadding: EdgeInsets.symmetric(horizontal: 20),
                           filled: true,
                           fillColor: Colors.white,
@@ -179,7 +179,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                         controller: newPasswordController,
                         obscureText: obSecure,
                         decoration: InputDecoration(
-                          errorStyle: TextStyle(color: Colors.red[100]),
+                          errorStyle: TextStyle(color: Colors.red),
                           contentPadding: EdgeInsets.symmetric(horizontal: 20),
                             filled: true,
                             fillColor: Colors.white,

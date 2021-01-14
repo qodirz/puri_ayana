@@ -65,5 +65,26 @@ class NetworkURL {
     return "$server/api/v1/notifications/$id";
   }
   
+  static String listWarga(){
+    return "$server/api/v1/users";
+  }
+
+  static String hutang(){
+    return "$server/api/v1/debts";
+  }
+
+  static String cicilan(){
+    return "$server/api/v1/installments";
+  }
+
+  static String cicilanDetail(int id){
+    return "$server/api/v1/installments/$id";
+  }
+
+  static String createNotification(){
+    return "$server/api/v1/notifications/add";
+  }
+  
+  
   
 }

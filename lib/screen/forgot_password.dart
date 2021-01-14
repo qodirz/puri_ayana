@@ -110,7 +110,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         validator: emailValidator,                          
                         controller: emailController,
                         decoration: InputDecoration(
-                          errorStyle: TextStyle(color: Colors.red[100]),
+                          errorStyle: TextStyle(color: Colors.red),
                           contentPadding: EdgeInsets.symmetric(horizontal: 20),
                           filled: true,
                           fillColor: Colors.white,

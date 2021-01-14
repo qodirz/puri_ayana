@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
+import 'package:puri_ayana_gempol/screen/home/home.dart';
 import 'package:puri_ayana_gempol/screen/info/pengumuman.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -10,10 +12,12 @@ import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/tap_bounce_container.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
-class PengumumanDetailPage extends StatefulWidget {  
-  final int pengumumanID;
-  PengumumanDetailPage(this.pengumumanID);
 
+
+class PengumumanDetailPage extends StatefulWidget {  
+  final Data data;
+  
+  PengumumanDetailPage(this.data);  
   @override
   _PengumumanDetailPageState createState() => _PengumumanDetailPageState();
 }
@@ -35,7 +39,7 @@ class _PengumumanDetailPageState extends State<PengumumanDetailPage> {
 
   getPengumumanDetail() async {
     try{
-      final response = await http.get(NetworkURL.pengumumanDetail(widget.pengumumanID), 
+      final response = await http.get(NetworkURL.pengumumanDetail(widget.data.pengumumanID), 
       headers: <String, String>{ 
         'Content-Type': 'application/json; charset=UTF-8', 
         'access-token': accessToken,
@@ -98,7 +102,12 @@ class _PengumumanDetailPageState extends State<PengumumanDetailPage> {
                         children: <Widget>[
                           InkWell(
                           onTap: () {
-                            Navigator.push(context,MaterialPageRoute(builder: (context) => PengumumanPage()));                            
+                            if (widget.data.from == "home"){
+                            Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
+                          }else{
+                            Navigator.push(context,MaterialPageRoute(builder: (context) => PengumumanPage()));
+                          }
+                            
                           },
                           child: Icon(Icons.arrow_back, size: 30,),
                           ),
@@ -115,27 +124,38 @@ class _PengumumanDetailPageState extends State<PengumumanDetailPage> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 40,),
-                    Column(children: [
-                      Container(
-                        width: double.infinity, 
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(color: Colors.green[100], width: 2))            
+                    SizedBox(height: 40,),                    
+                    title == null ?
+                      Container(      
+                        height: 150,
+                        color: Colors.green[50],
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            backgroundColor: Colors.green,
+                          )
+                        )
+                      )
+                    : Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.only(bottom: 4),
+                          width: double.infinity, 
+                          decoration: BoxDecoration(
+                            border: Border(bottom: BorderSide(color: Colors.green[100], width: 2))            
+                          ),
+                          child: Text(title.toString(), style: TextStyle(fontSize: 20, fontFamily: "mon", fontWeight: FontWeight.bold),),
                         ),
-                        child: Text("Title: " + title.toString(), style: TextStyle(fontSize: 16, fontFamily: "mon", fontWeight: FontWeight.bold),),
-                      ),
-                      SizedBox(height: 20,),
-                      Container(
-                        width: double.infinity, 
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide(color: Colors.green[100], width: 2))            
+                        //SizedBox(height: 20,),
+                        Container(
+                          padding: EdgeInsets.only(bottom: 6, top: 10),
+                          width: double.infinity, 
+                          decoration: BoxDecoration(
+                            border: Border(bottom: BorderSide(color: Colors.green[100], width: 2))            
+                          ),
+                          child: Text(description.toString(), style: TextStyle(fontSize: 16, fontFamily: "mon"),),
                         ),
-                        child: Text("Description: " + description.toString(), style: TextStyle(fontSize: 14, fontFamily: "mon"),),
-                      ),
-
-                    ],)
+                      ],
+                    ),
                     
                   ],
                 ),
