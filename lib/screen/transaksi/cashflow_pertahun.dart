@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:http/http.dart' as http;
 import 'package:puri_ayana_gempol/menu.dart';
@@ -77,39 +78,31 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.green[100], 
+    ));
+
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, size: 26),
+            onPressed: () {
+              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
+            },
+          ), 
+          title: Text("CASHFLOW PERTAHUN", style: TextStyle(fontFamily: "mon")),
+          centerTitle: true,
+        ),
         body: Container(         
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Expanded(
                 child: ListView(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(10),
                   children: <Widget>[
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          InkWell(
-                          onTap: () {
-                            Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
-                          },
-                          child: Icon(Icons.arrow_back, size: 30,),
-                          ),
-                          SizedBox(
-                            width: 4,
-                          ),
-                          Text(
-                            "CASHFLOW PERTAHUN",
-                            style: TextStyle(
-                              fontSize: 20, fontFamily: "mon"
-                            ),
-                          ),
-                          
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 20,),
                     backgroundHeader(title), 
                     _dataTableWidget(),   
                     _totalCash(),                
@@ -118,9 +111,8 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
               ),
             ],
           ),
-        )
-        
-      )
+        ),
+      ),
     );
   }
 

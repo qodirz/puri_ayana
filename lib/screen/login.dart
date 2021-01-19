@@ -99,6 +99,7 @@ class _LoginState extends State<Login> {
     }));
     
     final responJson = json.decode(response.body);
+    print("after login");
     print(responJson);
     Navigator.pop(context);
     if (response.headers['access-token'] != null) {
@@ -117,7 +118,8 @@ class _LoginState extends State<Login> {
         userModel.role, 
         userModel.addressId, 
         userModel.picBlok, 
-        responJson["avatar"]
+        responJson["avatar"],
+        responJson["has_debt"]
       );
       FocusScope.of(context).requestFocus(new FocusNode());
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Menu()));
@@ -142,7 +144,7 @@ class _LoginState extends State<Login> {
 
   savePref(
     String accessToken, uid, expiry, client,
-    String email, name, phoneNumber, role, addressId, picBlok, avatar
+    String email, name, phoneNumber, role, addressId, picBlok, avatar, hasDebt
   ) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     setState(() {
@@ -158,6 +160,7 @@ class _LoginState extends State<Login> {
       pref.setInt("addressId", addressId);
       pref.setString("picBlok", picBlok);
       pref.setString("avatar", avatar);
+      pref.setBool("hasDebt", hasDebt);
     });
   }
 
@@ -179,7 +182,7 @@ class _LoginState extends State<Login> {
               children: <Widget>[                
                 Expanded(
                   child: ListView(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(10),
                     children: <Widget>[
                       SizedBox(height: 90,),
                       Center(
@@ -200,6 +203,7 @@ class _LoginState extends State<Login> {
                           filled: true,
                           fillColor: Colors.white,
                             hintText: "Email",
+                            hintStyle: TextStyle(fontFamily: "mon"),
                             border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.green),
                               borderRadius: BorderRadius.circular(16),
@@ -227,6 +231,7 @@ class _LoginState extends State<Login> {
                             filled: true,
                             fillColor: Colors.white,
                             hintText: "Password",
+                            hintStyle: TextStyle(fontFamily: "mon"),
                             border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.green),
                               borderRadius: BorderRadius.circular(16),

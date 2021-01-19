@@ -1,15 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/cicilan_detail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/tap_bounce_container.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class CicilanPage extends StatefulWidget {
   @override
@@ -64,15 +63,11 @@ class _CicilanPageState extends State<CicilanPage> {
         });
       }  
     }on SocketException {
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "No Internet connection!"),
-      );
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);            
     } catch (e) {
       print("ERROR.........");
       print(e);
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "Error connection with server!"),
-      );
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
     }
     
   }
@@ -90,38 +85,29 @@ class _CicilanPageState extends State<CicilanPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.green[100], 
+    ));
+
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, size: 26),
+            onPressed: () {
+              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));              
+            },
+          ), 
+          title: Text("CICILAN", style: TextStyle(fontFamily: "mon")),
+          centerTitle: true,
+        ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Expanded(
               child: ListView(
-                padding: EdgeInsets.all(16),
-                children: <Widget>[
-                  Container(
-                    child: Row(
-                      children: <Widget>[
-                        InkWell(
-                        onTap: () {
-                          Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
-                        },
-                        child: Icon(Icons.arrow_back, size: 30,),
-                        ),
-                        SizedBox(
-                          width: 4,
-                        ),
-                        Text(
-                          "CICILAN",                       
-                          style: TextStyle(
-                            fontSize: 20, fontFamily: "mon"
-                          ),
-                        ),
-                        
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20,), 
+                children: <Widget>[                  
                   isLoading == true ?
                     Container(      
                       height: 150,
@@ -142,7 +128,8 @@ class _CicilanPageState extends State<CicilanPage> {
                           return Column(
                             children: <Widget>[
                               ListTile(
-                                tileColor: Colors.green[100],
+                                tileColor: Colors.green[50],
+                                trailing: Icon(Icons.chevron_right, size: 26, color: Colors.green,),
                                 title: Text(_listCicilan[index][1].toString(), style: TextStyle(fontFamily: "mon", fontWeight: FontWeight.bold, fontSize: 18)),
                                 isThreeLine: true,
                                 subtitle: Column(
@@ -167,7 +154,7 @@ class _CicilanPageState extends State<CicilanPage> {
                                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CicilanDetailPage(_listCicilan[index][0]) ));
                                 },
                               ),
-                              Divider(), //                           <-- Divider
+                              Divider(height: 1, color: Colors.green,), //                           <-- Divider
                             ],
                           );
                         },

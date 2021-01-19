@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/model/userModel.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
@@ -13,9 +15,6 @@ import 'package:async/async.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:form_field_validator/form_field_validator.dart';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/tap_bounce_container.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -150,14 +149,10 @@ class _ProfilePageState extends State<ProfilePage> {
             nameController.text = userModel.name;
             phoneNumberController.text = userModel.phoneNumber; 
           });
-                   
-          showTopSnackBar( context,
-            CustomSnackBar.success(message: data['message']),
-          );        
+
+          FlushbarHelper.createSuccess(title: 'Berhasil',message: data['message'],).show(context);                     
         } else {
-          showTopSnackBar( context,
-            CustomSnackBar.error(message: data['message']),
-          );                   
+          FlushbarHelper.createError(title: 'Error',message: data['message'],).show(context);                                
         }
         
       });
@@ -187,8 +182,23 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.green[100], 
+    ));
+
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, size: 26),
+            onPressed: () {
+              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
+            },
+          ), 
+          title: Text("PROFIL", style: TextStyle(fontFamily: "mon")),
+          centerTitle: true,
+        ),
         body: Container(          
           child: Form(
             key: _key,
@@ -197,31 +207,8 @@ class _ProfilePageState extends State<ProfilePage> {
               children: <Widget>[                
                 Expanded(
                   child: ListView(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(10),
                     children: <Widget>[
-                      Container(
-                        child: Row(
-                          children: <Widget>[
-                            InkWell(
-                            onTap: () {
-                              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
-                            },
-                            child: Icon(Icons.arrow_back, size: 30,),
-                            ),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Text(
-                              "PROFIL",                              
-                              style: TextStyle(
-                                fontSize: 20
-                              ),
-                            ),
-                            
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 20,),
                       Center(
                         child: Container(
                           height: 200,
@@ -264,6 +251,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           filled: true,
                           fillColor: Colors.white,
                           hintText: "Email",
+                          hintStyle: TextStyle(fontFamily: "mon"),
                           border: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.green),
                             borderRadius: BorderRadius.circular(16),
@@ -290,6 +278,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           filled: true,
                           fillColor: Colors.white,
                           hintText: "Nama",
+                          hintStyle: TextStyle(fontFamily: "mon"),
                           border: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.green),
                             borderRadius: BorderRadius.circular(16),
@@ -317,6 +306,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           filled: true,
                           fillColor: Colors.white,
                           hintText: "Telpon",
+                          hintStyle: TextStyle(fontFamily: "mon"),
                           border: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.green),
                             borderRadius: BorderRadius.circular(16),

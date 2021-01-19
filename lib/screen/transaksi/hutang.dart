@@ -1,6 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:line_icons/line_icons.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:puri_ayana_gempol/network/network.dart';
@@ -32,7 +34,7 @@ class _HutangPageState extends State<HutangPage> {
   }
 
   getHutang() async {
-    //try{
+    try{
       _listHutang.clear();
       final response = await http.get(NetworkURL.hutang(), 
       headers: <String, String>{ 
@@ -63,17 +65,13 @@ class _HutangPageState extends State<HutangPage> {
           isLoading = false;                   
         });
       }  
-    // }on SocketException {
-    //   showTopSnackBar( context,
-    //     CustomSnackBar.error(message: "No Internet connection!"),
-    //   );
-    // } catch (e) {
-    //   print("ERROR.........");
-    //   print(e);
-    //   showTopSnackBar( context,
-    //     CustomSnackBar.error(message: "Error connection with server!"),
-    //   );
-    // }    
+    }on SocketException {
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);            
+    } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
+      print("ERROR.........");
+      print(e);      
+    }    
   }
  
   Future<void> onRefresh() async {
@@ -96,7 +94,7 @@ class _HutangPageState extends State<HutangPage> {
           children: <Widget>[
             Expanded(
               child: ListView(
-                padding: EdgeInsets.all(16),
+                padding: EdgeInsets.all(10),
                 children: <Widget>[
                   Container(
                     child: Row(

@@ -85,6 +85,8 @@ class NetworkURL {
     return "$server/api/v1/notifications/add";
   }
   
-  
+  static String newUser(){
+    return "$server/api/v1/users/new";
+  }
   
 }

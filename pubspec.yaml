@@ -37,9 +37,10 @@ dependencies:
   image_picker: ^0.6.2+3
   intl: ^0.16.1
   form_field_validator: ^1.0.1
-  horizontal_data_table: ^1.0.8  
-  top_snackbar_flutter: ^0.0.3
+  horizontal_data_table: ^1.0.8 
   flutter_svg: 0.18.0
+  flushbar: ^1.10.2
+  flutter_masked_text: ^0.8.0
 
 dev_dependencies:
   flutter_test:

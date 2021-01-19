@@ -93,7 +93,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               children: <Widget>[                
                 Expanded(
                   child: ListView(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(10),
                     children: <Widget>[
                       SizedBox(height: 90,),
                       Center(
@@ -115,6 +115,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           filled: true,
                           fillColor: Colors.white,
                             hintText: "Email",
+                            hintStyle: TextStyle(fontFamily: "mon"),
                             border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.green),
                               borderRadius: BorderRadius.circular(16),

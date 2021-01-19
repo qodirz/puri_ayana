@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
 import 'package:puri_ayana_gempol/menu.dart';
@@ -124,43 +125,34 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.green[100], 
+    ));
+
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, size: 26),
+            onPressed: () {
+              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
+            },
+          ), 
+          title: Text("BAYAR IURAN BULANAN", style: TextStyle(fontFamily: "mon")),
+          centerTitle: true,
+        ),
         body: Container(          
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Expanded(
                 child: ListView(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(10),
                   children: <Widget>[
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          InkWell(
-                          onTap: () {
-                            Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
-                          },
-                          child: Icon(Icons.arrow_back, size: 30,),
-                          ),
-                          SizedBox(
-                            width: 4,
-                          ),
-                          Text(
-                            "BAYAR IURAN BULANAN",                              
-                            style: TextStyle(
-                              fontSize: 20, fontFamily: "mon"
-                            ),
-                          ),
-                          
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 20,),
                     _formSearchBayarIuran(),
                     SizedBox(height: 30,),
                     showDatasearch(),
-                    
                   ],
                 ),
               ),
@@ -207,6 +199,7 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
                   filled: true,
                   fillColor: Colors.white,
                   hintText: "Search blok",
+                  hintStyle: TextStyle(fontFamily: "mon"),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.green),
                     borderRadius: BorderRadius.circular(16),

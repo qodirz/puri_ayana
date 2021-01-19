@@ -1,31 +1,27 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:puri_ayana_gempol/menu.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:puri_ayana_gempol/screen/home/home.dart';
-import 'package:puri_ayana_gempol/screen/info/pengumuman.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/tap_bounce_container.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
+import 'package:http/http.dart' as http;
 
+class PengumumanItem extends StatefulWidget {  
+  final pengumumanID;
+  bool isRead;
+  final title;
+  final description; 
 
+  PengumumanItem(this.pengumumanID, this.title, this.description, this.isRead);
 
-class PengumumanDetailPage extends StatefulWidget {  
-  final Data data;
-  
-  PengumumanDetailPage(this.data);  
   @override
-  _PengumumanDetailPageState createState() => _PengumumanDetailPageState();
+  _PengumumanItemState createState() => _PengumumanItemState();
 }
 
-class _PengumumanDetailPageState extends State<PengumumanDetailPage> {
-  
-  String accessToken, uid, expiry, client, title, description; 
-  
+class _PengumumanItemState extends State<PengumumanItem> {
+
+  String accessToken, uid, expiry, client, tagihan; 
   getPref() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     setState(() {
@@ -34,12 +30,14 @@ class _PengumumanDetailPageState extends State<PengumumanDetailPage> {
       expiry = pref.getString("expiry");
       client = pref.getString("client");
     });
-    getPengumumanDetail();
   }
 
-  getPengumumanDetail() async {
+  getPengumumanDetail(pengumumanID) async {
+    print("get pengumuman detail");
+    print(pengumumanID);
+    print(accessToken);
     try{
-      final response = await http.get(NetworkURL.pengumumanDetail(widget.data.pengumumanID), 
+      final response = await http.get(NetworkURL.pengumumanDetail(pengumumanID), 
       headers: <String, String>{ 
         'Content-Type': 'application/json; charset=UTF-8', 
         'access-token': accessToken,
@@ -53,29 +51,18 @@ class _PengumumanDetailPageState extends State<PengumumanDetailPage> {
       print("getPengumumanDetail");
       print(responJson);
       if(responJson["success"] == true){
-        final data = responJson["notification"];
         setState(() {
-          title = data["title"];
-          description = data["notif"];
+          
         });      
       }else{
       }  
     }on SocketException {
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "No Internet connection!"),
-      );
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);            
     } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
       print("ERROR.........");
-      print(e);
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "Error connection with server!"),
-      );
+      print(e);      
     }
-    
-  }
- 
-  Future<void> onRefresh() async {
-    getPref();
   }
 
   @override
@@ -86,85 +73,56 @@ class _PengumumanDetailPageState extends State<PengumumanDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: RefreshIndicator(
-          onRefresh: onRefresh,         
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    return FlatButton(
+      padding: EdgeInsets.all(0) ,
+      onPressed: () {
+        _settingModalBottomSheet(context, widget.title, widget.description);          
+        setState(() {
+          widget.isRead = true;
+        });
+        // hit ke api supaya data isRead nya ke update di database
+        getPengumumanDetail(widget.pengumumanID);
+      }, 
+      child: ListTile(
+        trailing: Icon(
+          Icons.notification_important, size: 26, 
+            color: widget.isRead == true ? Colors.grey : Colors.green
+          ),
+        tileColor: widget.isRead == true ? Colors.green[50] : Colors.green[100],
+        title: Text(widget.title,
+          style: TextStyle(fontFamily: "mon",),
+          overflow: TextOverflow.ellipsis,                                
+        ),
+        subtitle: Text(widget.description,
+          style: TextStyle(fontFamily: "mon",),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+        ),
+      ),
+    );    
+  }
+
+  void _settingModalBottomSheet(context, title, description){
+      showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc){
+          return Container(
+            child: new Wrap(
             children: <Widget>[
-              Expanded(
-                child: ListView(
-                  padding: EdgeInsets.all(16),
-                  children: <Widget>[
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          InkWell(
-                          onTap: () {
-                            if (widget.data.from == "home"){
-                            Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
-                          }else{
-                            Navigator.push(context,MaterialPageRoute(builder: (context) => PengumumanPage()));
-                          }
-                            
-                          },
-                          child: Icon(Icons.arrow_back, size: 30,),
-                          ),
-                          SizedBox(
-                            width: 4,
-                          ),
-                          Text(
-                            "PENGUMUMAN DETAIL",                       
-                            style: TextStyle(
-                              fontSize: 20, fontFamily: "mon"
-                            ),
-                          ),
-                          
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 40,),                    
-                    title == null ?
-                      Container(      
-                        height: 150,
-                        color: Colors.green[50],
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            backgroundColor: Colors.green,
-                          )
-                        )
-                      )
-                    : Column(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.only(bottom: 4),
-                          width: double.infinity, 
-                          decoration: BoxDecoration(
-                            border: Border(bottom: BorderSide(color: Colors.green[100], width: 2))            
-                          ),
-                          child: Text(title.toString(), style: TextStyle(fontSize: 20, fontFamily: "mon", fontWeight: FontWeight.bold),),
-                        ),
-                        //SizedBox(height: 20,),
-                        Container(
-                          padding: EdgeInsets.only(bottom: 6, top: 10),
-                          width: double.infinity, 
-                          decoration: BoxDecoration(
-                            border: Border(bottom: BorderSide(color: Colors.green[100], width: 2))            
-                          ),
-                          child: Text(description.toString(), style: TextStyle(fontSize: 16, fontFamily: "mon"),),
-                        ),
-                      ],
-                    ),
-                    
-                  ],
-                ),
+              new ListTile(
+                title: new Text(title, style: TextStyle(fontFamily: "mon", fontWeight: FontWeight.bold),),
+                onTap: () => {}          
+              ),
+              Divider(height: 1, color: Colors.green,), 
+              new ListTile(
+                title: new Text(description, style: TextStyle(fontFamily: "mon"),),
+                onTap: () => {},          
               ),
             ],
           ),
-        )
-        
-      )
-    );
+          );
+        }
+      );
   }
+
 }

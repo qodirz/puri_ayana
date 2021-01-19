@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:puri_ayana_gempol/screen/info/pengumuman.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'dart:convert';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class BuatPengumumanPage extends StatefulWidget {
   @override
@@ -63,18 +62,15 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
     final responJson = json.decode(response.body);
     print(responJson);
     
-    if(responJson["success"] == true){   
-      showTopSnackBar( context,
-        CustomSnackBar.success(message: responJson["message"]),
-      );   
+    if(responJson["success"] == true){
+      FlushbarHelper.createSuccess(title: 'Berhasil',message: responJson["message"],).show(context);           
       setState(() {
+        titleController.text = '';
+        descriptionController.text = '';
         isloading = false;    
-      }); 
-      Navigator.push(context,MaterialPageRoute(builder: (context) => PengumumanPage()));     
+      });        
     }else{
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: responJson["message"]),
-      );
+      FlushbarHelper.createError(title: 'Error',message: responJson["message"],).show(context);      
       setState(() {
         isloading = false;                
       }); 
@@ -89,8 +85,23 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.green[100], 
+    ));
+
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, size: 26),
+            onPressed: () {
+              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
+            },
+          ), 
+          title: Text("BUAT PENGUMUMAN", style: TextStyle(fontFamily: "mon")),
+          centerTitle: true,
+        ),
         body: Container(          
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -99,30 +110,9 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
                 child: Form(
                   key: _key,
                   child: ListView(
-                    padding: EdgeInsets.all(16),
-                    children: <Widget>[
-                      Container(
-                        child: Row(
-                          children: <Widget>[
-                            InkWell(
-                            onTap: () {
-                              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
-                            },
-                            child: Icon(Icons.arrow_back, size: 30),
-                            ),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Text(
-                              "BUAT PENGUMUMAN",                              
-                              style: TextStyle(
-                                fontSize: 20, fontFamily: "mon"
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 20,),
+                    padding: EdgeInsets.all(10),
+                    children: <Widget>[  
+                      SizedBox(height: 20,),                                              
                       _titleField(),
                       SizedBox(height: 10,),
                       _descriptionField(),
@@ -148,6 +138,7 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
         filled: true,
         fillColor: Colors.white,
           hintText: "Title",
+          hintStyle: TextStyle(fontFamily: "mon"),
           border: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.green),
             borderRadius: BorderRadius.circular(16),
@@ -176,6 +167,7 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
         filled: true,
         fillColor: Colors.white,
           hintText: "Description",
+          hintStyle: TextStyle(fontFamily: "mon"),
           border: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.green),
             borderRadius: BorderRadius.circular(16),

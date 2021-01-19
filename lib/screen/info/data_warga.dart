@@ -1,22 +1,29 @@
+import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:line_icons/line_icons.dart';
-import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
+import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/tap_bounce_container.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class DataWargaPage extends StatefulWidget {
+  DataWargaPage({ Key key }) : super(key: key);
   @override
-  _DataWargaPageState createState() => _DataWargaPageState();
+  _DataWargaPageState createState() => new _DataWargaPageState();
+
 }
 
-class _DataWargaPageState extends State<DataWargaPage> {
-  List _listWarga = [];
+class _DataWargaPageState extends State<DataWargaPage>
+{
+  Widget appBarTitle = new Text("DATA WARGA", style: new TextStyle(color: Colors.white),);
+  Icon actionIcon = new Icon(Icons.search, color: Colors.white,);
+  final key = new GlobalKey<ScaffoldState>();
+  final TextEditingController _searchQuery = new TextEditingController();
+  List<Map<String, dynamic>> _list = [] ;
+
+  bool _isSearching;
+  String _searchText = "";
   bool isLoading = false;
 
   String accessToken, uid, expiry, client, tagihan; 
@@ -33,9 +40,26 @@ class _DataWargaPageState extends State<DataWargaPage> {
     getUsers();
   }
 
+  _SearchListState() {
+    _searchQuery.addListener(() {
+      if (_searchQuery.text.isEmpty) {
+        setState(() {
+          _isSearching = false;
+          _searchText = "";
+        });
+      }
+      else {
+        setState(() {
+          _isSearching = true;
+          _searchText = _searchQuery.text;
+        });
+      }
+    });
+  }
+
   getUsers() async {
     try{
-      _listWarga.clear();
+      _list.clear();
       final response = await http.get(NetworkURL.listWarga(), 
       headers: <String, String>{ 
         'Content-Type': 'application/json; charset=UTF-8', 
@@ -54,7 +78,11 @@ class _DataWargaPageState extends State<DataWargaPage> {
         setState(() {
           isLoading = false;
           for (Map i in data) {
-            _listWarga.add( [i["id"], i["email"], i["name"], i["phone_number"]] );            
+            _list.add( {
+              'email': i["email"], 
+              'name': i["name"],
+              'blok': i["blok_name"] == null ? "-" : i["blok_name"] 
+            });
           }          
         });      
       }else{
@@ -63,111 +91,131 @@ class _DataWargaPageState extends State<DataWargaPage> {
         });
       }  
     }on SocketException {
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "No Internet connection!"),
-      );
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
     } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
       print("ERROR.........");
-      print(e);
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "Error connection with server!"),
-      );
+      print(e);      
     }    
-  }
- 
-  Future<void> onRefresh() async {
-    _listWarga.clear();
-    getPref();
   }
 
   @override
   void initState() {
-    getPref();
     super.initState();
+    _isSearching = false;
+    getPref();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.all(16),
-                children: <Widget>[
-                  Container(
-                    child: Row(
-                      children: <Widget>[
-                        InkWell(
-                        onTap: () {
-                          Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));                          
-                        },
-                        child: Icon(Icons.arrow_back, size: 30,),
-                        ),
-                        SizedBox(
-                          width: 4,
-                        ),
-                        Text(
-                          "DATA WARGA",                       
-                          style: TextStyle(
-                            fontSize: 20, fontFamily: "mon"
-                          ),
-                        ),
-                        
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20,), 
-                  isLoading == true ?
-                    Container(      
-                      height: 150,
-                      color: Colors.green[50],
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          backgroundColor: Colors.green,
-                        )
-                      )
-                    ) :
-                    ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: _listWarga.length,
-                      itemBuilder: (BuildContext context, int index){
-                        return Column(
-                          children: <Widget>[
-                            ListTile(
-                              tileColor: Colors.green[50],
-                              leading: Icon(LineIcons.user, size: 50),
-                              title: Text(_listWarga[index][1]),
-                              subtitle: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Text(_listWarga[index][2]),
-                                  ),
-                                  SizedBox(height: 5,),
-                                  Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Text(_listWarga[index][3]),
-                                  ),
-                              ],), 
-                              isThreeLine: true,
-                            ),
-                            Divider(),
-                          ],
-                        );
-                      },
-                    )
-                ],
-              ),
-            ),
-          ],
-        ),
-      )
+    return new Scaffold(
+      key: key,
+      appBar: buildBar(context),
+      body: new ListView(
+        padding: new EdgeInsets.symmetric(vertical: 8.0),
+        children: _isSearching ? _buildSearchList() : _buildList(),
+      ),
     );
   }
+
+  List<ChildItem> _buildList() {
+    return _list.map((contact) => new ChildItem(contact['email'], contact['name'], contact['blok'])).toList();
+  }
+
+  List<ChildItem> _buildSearchList() {
+    if (_searchText.isEmpty) {
+      return _list.map((contact) => new ChildItem(contact['email'], contact['name'], contact['blok']))
+          .toList();
+    }
+    else {
+      List<Map<String, dynamic>> _searchList = [];
+      for (int i = 0; i < _list.length; i++) {
+        String email = _list.elementAt(i)['email'];
+        String name = _list.elementAt(i)['name'];
+        String blok = _list.elementAt(i)['blok'];
+        if (blok.toLowerCase().contains(_searchText.toLowerCase())) {
+          _searchList.add({'email': email, 'name': name, 'blok': blok});
+        }
+      }
+      return _searchList.map((contact) => new ChildItem(contact['email'], contact['name'], contact['blok']))
+          .toList();
+    }
+  }
+
+  Widget buildBar(BuildContext context) {
+    return new AppBar(
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back, size: 26),
+        onPressed: () {
+          Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
+        },
+      ), 
+      backgroundColor: Colors.green,
+      centerTitle: true,
+      title: appBarTitle,
+      actions: <Widget>[
+        new IconButton(icon: actionIcon, onPressed: () {
+          setState(() {
+            if (this.actionIcon.icon == Icons.search) {
+              this.actionIcon = new Icon(Icons.close, color: Colors.white,);
+              this.appBarTitle = new TextField(
+                controller: _searchQuery,
+                style: new TextStyle(
+                  color: Colors.white,
+
+                ),
+                decoration: new InputDecoration(
+                    prefixIcon: new Icon(Icons.search, color: Colors.white),
+                    hintText: "Search...",
+                    hintStyle: TextStyle(fontFamily: "mon", color: Colors.white),
+                ),
+              );
+              _handleSearchStart();
+            }
+            else {
+              _handleSearchEnd();
+            }
+          });
+        },),
+      ]
+    );
+  }
+
+  void _handleSearchStart() {
+    setState(() {
+      _isSearching = true;
+    });
+  }
+
+  void _handleSearchEnd() {
+    setState(() {
+      this.actionIcon = new Icon(Icons.search, color: Colors.white,);
+      this.appBarTitle =
+      new Text("DATA WARGA", style: new TextStyle(color: Colors.white),);
+      _isSearching = false;
+      _searchQuery.clear();
+    });
+  }
+}
+
+class ChildItem extends StatelessWidget {
+  final String email;
+  final String name;
+  final String blok;
+  ChildItem(this.email, this.name, this.blok);
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ListTile(
+          tileColor: Colors.green[50],
+          leading: Text(this.blok.toString(), style: TextStyle(fontFamily: "mon", fontSize: 32),),                                
+          title: new Text(this.email.toString()),
+          subtitle: new Text(this.name.toString()),
+        ),
+        Divider(height: 1, color: Colors.green),
+      ],
+    );
+  }
+
 }

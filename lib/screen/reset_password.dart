@@ -108,7 +108,7 @@ class _ResetPasswordState extends State<ResetPassword> {
               children: <Widget>[                
                 Expanded(
                   child: ListView(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(10),
                     children: <Widget>[
                       SizedBox(height: 90,),
                       Center(
@@ -130,6 +130,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                           filled: true,
                           fillColor: Colors.white,
                           hintText: "Email",
+                          hintStyle: TextStyle(fontFamily: "mon"),
                           border: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.green),
                             borderRadius: BorderRadius.circular(16),
@@ -157,6 +158,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                           filled: true,
                           fillColor: Colors.white,
                           hintText: "Token",
+                          hintStyle: TextStyle(fontFamily: "mon"),
                           border: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.green),
                             borderRadius: BorderRadius.circular(16),
@@ -184,6 +186,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                             filled: true,
                             fillColor: Colors.white,
                             hintText: "Password Baru",
+                            hintStyle: TextStyle(fontFamily: "mon"),
                             border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.green),
                               borderRadius: BorderRadius.circular(16),
@@ -219,6 +222,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                             filled: true,
                             fillColor: Colors.white,
                             hintText: "Password Konfirmasi",
+                            hintStyle: TextStyle(fontFamily: "mon"),
                             border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.green),
                               borderRadius: BorderRadius.circular(16),

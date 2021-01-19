@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/screen/login.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
@@ -18,7 +19,8 @@ class _NewUserPageState extends State<NewUserPage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
   
-  String accessToken, uid, expiry, client, name, phoneNumber, role, addressId, picBlok;
+  String accessToken, uid, expiry, client, name, phoneNumber, role;
+  bool isloading = false;
   
   final _key = GlobalKey<FormState>();
   var obSecureCurrentPwd = true;
@@ -37,28 +39,13 @@ class _NewUserPageState extends State<NewUserPage> {
 
   cek() {
     if (_key.currentState.validate()) {
+      isloading = true;
       submit();
     }
   }
 
-  submit() async {
-    showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("Processing.."),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                CircularProgressIndicator(),
-                SizedBox( height: 16, ),
-                Text("Please wait...")
-              ],
-            ),
-          );
-        });
-    
-    final response = await http.put(NetworkURL.updatePassword(), 
+  submit() async {    
+    final response = await http.post(NetworkURL.newUser(), 
     headers: <String, String>{ 
       'Content-Type': 'application/json; charset=UTF-8', 
       'access-token': accessToken,
@@ -66,7 +53,8 @@ class _NewUserPageState extends State<NewUserPage> {
       'uid': uid,
       'client': client,
       'token-type': "Bearer"
-    },body: jsonEncode(<String, String>{        
+    },body: jsonEncode(<String, String>{ 
+      "email": emailController.text.trim(),        
       "name": nameController.text.trim(), 
       "phoneNumber": phoneNumberController.text.trim(),       
     }));
@@ -76,24 +64,7 @@ class _NewUserPageState extends State<NewUserPage> {
     print(responJson);
     if (responJson != null) {
       Navigator.pop(context);
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            content: Text(responJson['message']),
-            actions: <Widget>[
-              FlatButton(
-                onPressed: () => {
-                  responJson['status'] == true ? 
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()))
-                  : Navigator.pop(context)                  
-                },
-                child: Text("Ok"),
-              ),
-            ],
-          );
-        }
-      );
+      
     }    
   }
 
@@ -105,43 +76,34 @@ class _NewUserPageState extends State<NewUserPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.green[100], 
+    ));
+
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, size: 26),
+            onPressed: () {
+              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
+            },
+          ), 
+          title: Text("BUAT USER BARU", style: TextStyle(fontFamily: "mon")),
+          centerTitle: true,
+        ),
         body: Container(          
           child: Form(
             key: _key,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[                
+              children: <Widget>[  
+                SizedBox(height: 20,),                                        
                 Expanded(
                   child: ListView(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(10),
                     children: <Widget>[
-                      Container(
-                        child: Row(
-                          children: <Widget>[
-                            InkWell(
-                            onTap: () {
-                              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
-                            },
-                            child: Icon(Icons.arrow_back, size: 30,),
-                            ),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Text(
-                              "BUAT USER BARU",         
-                              style: TextStyle(
-                                fontSize: 20, fontFamily: "mon"
-                              ),
-                            ),
-                            
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 60,
-                      ),
                       TextFormField(                        
                         controller: emailController,
                         decoration: InputDecoration(
@@ -149,6 +111,7 @@ class _NewUserPageState extends State<NewUserPage> {
                           filled: true,
                           fillColor: Colors.white,
                           hintText: "Email",
+                          hintStyle: TextStyle(fontFamily: "mon"),
                           border: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.green),
                             borderRadius: BorderRadius.circular(16),
@@ -164,7 +127,7 @@ class _NewUserPageState extends State<NewUserPage> {
                         ),
                       ),
                       SizedBox(
-                        height: 16,
+                        height: 10,
                       ),
                       TextFormField(                        
                         controller: nameController,
@@ -173,6 +136,7 @@ class _NewUserPageState extends State<NewUserPage> {
                           filled: true,
                           fillColor: Colors.white,
                           hintText: "Nama",
+                          hintStyle: TextStyle(fontFamily: "mon"),
                           border: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.green),
                             borderRadius: BorderRadius.circular(16),
@@ -188,7 +152,7 @@ class _NewUserPageState extends State<NewUserPage> {
                         ),
                       ),
                       SizedBox(
-                        height: 16,
+                        height: 10,
                       ),
                       TextFormField(                        
                         controller: phoneNumberController,
@@ -197,6 +161,7 @@ class _NewUserPageState extends State<NewUserPage> {
                           filled: true,
                           fillColor: Colors.white,
                           hintText: "Telpon",
+                          hintStyle: TextStyle(fontFamily: "mon"),
                           border: OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.green),
                             borderRadius: BorderRadius.circular(16),
@@ -212,17 +177,9 @@ class _NewUserPageState extends State<NewUserPage> {
                         ),
                       ),
                       SizedBox(
-                        height: 16,
+                        height: 10,
                       ),
-                      InkWell(
-                        onTap: () {
-                          cek();
-                        },
-                        child: CustomButton(
-                          "SIMPAN",
-                          color: Colors.green[400],
-                        ),
-                      ),
+                      _btnSimpan(),
                     ],
                   ),
                 ),
@@ -232,5 +189,31 @@ class _NewUserPageState extends State<NewUserPage> {
         ),
       ),
     );
+  }
+
+  Widget _btnSimpan() {
+    if(isloading == true){
+      return Container(
+        width: double.infinity,         
+        child: CustomButton(
+          "loading...",
+          color: Colors.green,
+        ),
+      );
+    }else{
+      return Container(
+        width: double.infinity,  
+        child: InkWell(
+          onTap: () {
+            cek();
+          },
+          child: CustomButton(
+            "SIMPAN",
+            color: Colors.green,
+          ),
+        ),
+        
+      );
+    }    
   }
 }

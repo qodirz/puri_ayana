@@ -15,8 +15,7 @@ class AkunPage extends StatefulWidget {
 }
 
 class _AkunPageState extends State<AkunPage> {
-	GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  TextEditingController emailController = TextEditingController();
+	TextEditingController emailController = TextEditingController();
   String accessToken, uid, expiry, client, name, phoneNumber, picBlok;
   int role;
   
@@ -96,18 +95,19 @@ class _AkunPageState extends State<AkunPage> {
     } else {
       Navigator.pop(context);
       showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              content: Text("Logout failed."),
-              actions: <Widget>[
-                FlatButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text("Ok"),
-                ),
-              ],
-            );
-          });
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: Text("Logout failed."),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text("Ok"),
+              ),
+            ],
+          );
+        }
+      );
     }
   }
 
@@ -119,9 +119,14 @@ class _AkunPageState extends State<AkunPage> {
 	@override
 	Widget build(BuildContext context) {
 		return new Scaffold(
-      resizeToAvoidBottomInset: false, 
-			key: _scaffoldKey,
-      body: new Container(       
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        toolbarHeight: 100,
+        backgroundColor: Colors.green,         
+        title: Text("Akun", style: TextStyle( fontSize: 30, fontWeight: FontWeight.bold, fontFamily: 'mon')),
+        centerTitle: true,
+      ),
+      body: new Container(  
         child: ListView(
           children: <Widget>[
             Padding(
@@ -129,26 +134,17 @@ class _AkunPageState extends State<AkunPage> {
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Stack(
-                    children: <Widget>[backgroundHeader()],
-                  ),
-                  SizedBox(height: 10),                  
-                  cardList('PROFIL', "profile", true, context),
-                  cardList('UBAH PASSWORD', "update_password", true, context),
-                  if (role == 2 || role == 3) cardList('BUAT USER BARU', "new_user", true, context),
-                  Card(    
-                    color: Colors.red,
-                    margin: EdgeInsets.only(top: 10, left: 20, right: 20),
-                    elevation: 10,
-                    child: ListTile(  
-                      title: Text(
-                        "LOG OUT",
-                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16, fontFamily: "mon"),
-                      ),
-                      onTap: () {
-                        _logOut();                        
-                      }
+                  cardList('PROFIL', "profile", context),
+                  cardList('UBAH PASSWORD', "update_password", context),
+                  if (role == 2 || role == 3) cardList('BUAT USER BARU', "new_user", context),
+                  ListTile(  
+                    tileColor: Colors.redAccent,
+                    title: Text(
+                      "LOG OUT", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16, fontFamily: "mon"),
                     ),
+                    onTap: () {
+                      _logOut();                        
+                    }
                   ),
                 ],
               ),
@@ -160,49 +156,27 @@ class _AkunPageState extends State<AkunPage> {
 	}
 }
 
-Widget backgroundHeader() {
-  return Container(
-    color: Colors.green[300],
-    height: 90,
-    width: double.infinity,
-    child: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            "Akun",
-            style: TextStyle(
-              fontSize: 30, fontWeight: FontWeight.bold, fontFamily: 'mon'),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-Widget cardList(title, page, trailing, context) {
-  return Card(    
-    color: Colors.green[100],
-    margin: EdgeInsets.only(top: 10, left: 20, right: 20),
-    elevation: 10,
-    child: ListTile(  
-      title: Text(
-        title,
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: "mon"),
-      ),
-      trailing: trailing ? Icon(Icons.chevron_right, size: 26,) : null,
-      onTap: () {
-        print(page);
-        if (page == "profile"){
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfilePage()));  
-        }else if(page == "update_password"){
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UpdatePasswordPage()));
-        }else if(page == "new_user"){
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => NewUserPage()));
+Widget cardList(title, page, context) {
+  return Column(
+    children: [
+      ListTile(  
+        tileColor: Colors.green[50],
+        title: Text(
+          title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: "mon"),
+        ),
+        trailing: Icon(Icons.chevron_right, size: 26, color: Colors.green,),
+        onTap: () {
+          print(page);
+          if (page == "profile"){
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfilePage()));  
+          }else if(page == "update_password"){
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UpdatePasswordPage()));
+          }else if(page == "new_user"){
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => NewUserPage()));
+          }
         }
-      }
-    ),
+      ),
+      Divider(height: 1, color: Colors.green,)
+    ]  
   );
 }

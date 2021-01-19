@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:form_field_validator/form_field_validator.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
@@ -17,6 +19,19 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController passwordConfirmationController = TextEditingController();
   String accessToken, uid, expiry, client, name, phoneNumber, role, addressId, picBlok;
+
+  final currentPasswordValidator = MultiValidator([  
+    RequiredValidator(errorText: 'password saat ini harus di isi!'),  
+    MinLengthValidator(8, errorText: 'sandi harus terdiri dari minimal 8 digit'),  
+    PatternValidator(r'([0-9])', errorText: 'kata sandi harus memiliki setidaknya satu angka')  
+  ]); 
+
+  final newPasswordValidator = MultiValidator([  
+    RequiredValidator(errorText: 'password baru harus di isi!'),  
+    MinLengthValidator(8, errorText: 'sandi harus terdiri dari minimal 8 digit'),  
+    PatternValidator(r'([0-9])', errorText: 'kata sandi harus memiliki setidaknya satu angka')  
+  ]); 
+
   
   final _key = GlobalKey<FormState>();
   var obSecureCurrentPwd = true;
@@ -108,8 +123,23 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.green[100], 
+    ));
+
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, size: 26),
+            onPressed: () {
+              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
+            },
+          ), 
+          title: Text("UPDATE PASSWORD", style: TextStyle(fontFamily: "mon")),
+          centerTitle: true,
+        ),
         body: Container(          
           child: Form(
             key: _key,
@@ -118,40 +148,11 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
               children: <Widget>[                
                 Expanded(
                   child: ListView(
-                    padding: EdgeInsets.all(16),
+                    padding: EdgeInsets.all(10),
                     children: <Widget>[
-                      Container(
-                        child: Row(
-                          children: <Widget>[
-                            InkWell(
-                            onTap: () {
-                              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
-                            },
-                            child: Icon(Icons.arrow_back, size: 30,),
-                            ),
-                            SizedBox(
-                              width: 4,
-                            ),
-                            Text(
-                              "Update Password",                              
-                              style: TextStyle(
-                                fontSize: 20, fontFamily: "mon",                                
-                              ),
-                            ),
-                            
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 60,
-                      ),
+                      SizedBox(height: 20,),                          
                       TextFormField(
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'Please enter some text';
-                          }
-                          return null;
-                        },
+                        validator: currentPasswordValidator,
                         controller: currentPasswordController,
                         obscureText: obSecureCurrentPwd,
                         decoration: InputDecoration(
@@ -159,6 +160,7 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
                             filled: true,
                             fillColor: Colors.white,
                             hintText: "Password saat ini",
+                            hintStyle: TextStyle(fontFamily: "mon"),
                             border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.green),
                               borderRadius: BorderRadius.circular(16),
@@ -186,6 +188,7 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
                         height: 16,
                       ),
                       TextFormField(
+                        validator: newPasswordValidator,
                         controller: passwordController,
                         obscureText: obSecurePwd,
                         decoration: InputDecoration(
@@ -193,6 +196,7 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
                             filled: true,
                             fillColor: Colors.white,
                             hintText: "Password",
+                            hintStyle: TextStyle(fontFamily: "mon"),
                             border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.green),
                               borderRadius: BorderRadius.circular(16),
@@ -220,6 +224,7 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
                         height: 16,
                       ),
                       TextFormField(
+                        validator: (val) => MatchValidator(errorText: 'passwords tidak sama').validateMatch(val, passwordConfirmationController.text),       
                         controller: passwordConfirmationController,
                         obscureText: obSecurePwdConf,
                         decoration: InputDecoration(
@@ -227,6 +232,7 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
                             filled: true,
                             fillColor: Colors.white,
                             hintText: "Password Konfirmasi",
+                            hintStyle: TextStyle(fontFamily: "mon"),
                             border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.green),
                               borderRadius: BorderRadius.circular(16),

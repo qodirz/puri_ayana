@@ -1,20 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:puri_ayana_gempol/screen/home/home.dart';
 import 'package:puri_ayana_gempol/screen/info/pengumuman_detail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/tap_bounce_container.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class PengumumanPage extends StatefulWidget {
   final String from;
   const PengumumanPage({this.from});
-
+  
   @override
   _PengumumanPageState createState() => _PengumumanPageState();
 }
@@ -24,7 +22,6 @@ class _PengumumanPageState extends State<PengumumanPage> {
   bool isLoading = false;
 
   String accessToken, uid, expiry, client, tagihan; 
-  double contribution;
   getPref() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     setState(() {
@@ -67,19 +64,14 @@ class _PengumumanPageState extends State<PengumumanPage> {
         });
       }  
     }on SocketException {
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "No Internet connection!"),
-      );
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
     } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
       print("ERROR.........");
-      print(e);
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "Error connection with server!"),
-      );
-    }
-    
+      print(e);      
+    }    
   }
- 
+  
   Future<void> onRefresh() async {
     _pengumumanList.clear();
     getPref();
@@ -93,93 +85,63 @@ class _PengumumanPageState extends State<PengumumanPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.all(16),
-                children: <Widget>[
-                  Container(
-                    child: Row(
-                      children: <Widget>[
-                        InkWell(
-                        onTap: () {
-                          if (widget.from == "home"){
-                            Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
-                          }else{
-                            Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
-                          }
-                        },
-                        child: Icon(Icons.arrow_back, size: 30,),
-                        ),
-                        SizedBox(
-                          width: 4,
-                        ),
-                        Text(
-                          "PENGUMUMAN",                       
-                          style: TextStyle(
-                            fontSize: 20, fontFamily: "mon"
-                          ),
-                        ),
-                        
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 20,), 
-                  isLoading == true ?
-                    Container(      
-                      height: 150,
-                      color: Colors.green[50],
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          backgroundColor: Colors.green,
-                        )
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.green[100], 
+    ));
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, size: 26),
+          onPressed: () {
+            if (widget.from == "home"){
+              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
+            }else{
+              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
+            }
+          },
+        ), 
+        title: Text("PENGUMUMAN", style: TextStyle(fontFamily: "mon")),
+        centerTitle: true,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(
+            child: ListView(
+              children: <Widget>[
+                isLoading == true ?
+                  Container(      
+                    height: 150,
+                    color: Colors.green[50],
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.green,
                       )
-                    ) : 
-                    ListView.builder(
-                      scrollDirection: Axis.vertical,
-                      shrinkWrap: true,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: _pengumumanList.length,
-                      itemBuilder: (BuildContext context, int index){
-                        return Column(
-                          children: <Widget>[
-                            ListTile(
-                              tileColor: _pengumumanList[index][3] == true ? Colors.green[200] : Colors.green[400],
-                              title: Text(_pengumumanList[index][1],
-                                style: TextStyle(fontFamily: "mon",),
-                                overflow: TextOverflow.ellipsis,                                
-                              ),
-                              subtitle: Text(_pengumumanList[index][2],
-                                style: TextStyle(fontFamily: "mon",),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                              ),
-                              onTap: () {
-                                final data = Data(
-                                  pengumumanID: _pengumumanList[index][0],
-                                  from: "null"
-                                );
-                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanDetailPage(data)));
-                                
-                                //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanDetailPage(_pengumumanList[index][0])));
-                              },
-                            ),
-                            Divider(), //                           <-- Divider
-                          ],
-                        );
-                      },
-                    ),
-                    
-                ],
-              ),
+                    )
+                  ) : 
+                  ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: _pengumumanList.length,
+                    itemBuilder: (BuildContext context, int index){
+                      return Column(
+                        children: <Widget>[                          
+                          PengumumanItem(_pengumumanList[index][0], _pengumumanList[index][1], _pengumumanList[index][2], _pengumumanList[index][3]),
+                          Divider(height: 1, color: Colors.green,), 
+                        ],
+                      );
+                    },
+                  ),
+                  
+              ],
             ),
-          ],
-        ),
-      )
+          ),
+        ],
+      ),
     );
   }
+
 }

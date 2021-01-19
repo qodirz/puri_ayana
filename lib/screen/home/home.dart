@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/screen/home/blok_detail.dart';
 import 'package:puri_ayana_gempol/screen/info/pengumuman_detail.dart';
@@ -11,9 +12,13 @@ import 'package:puri_ayana_gempol/custom/colored_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/tap_bounce_container.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
+
+
+class Data {
+  int pengumumanID;
+  String from;
+  Data({this.pengumumanID, this.from});
+}
 
 class Home extends StatefulWidget {
   @override
@@ -48,7 +53,7 @@ class _HomeState extends State<Home> {
 
   getHome() async {
     print("masuk ke home yah");
-    //try {
+    try {
       _pengumumanList.clear();
       final response = await http.get(NetworkURL.homePage(), 
       headers: <String, String>{ 
@@ -83,17 +88,13 @@ class _HomeState extends State<Home> {
         Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Login()), 
         (Route<dynamic> route) => false);  
       }    
-    // } on SocketException {
-    //   showTopSnackBar( context,
-    //     CustomSnackBar.error(message: "No Internet connection!"),
-    //   );
-    // } catch (e) {
-    //   print("ERROR.........");
-    //   print(e);
-    //   showTopSnackBar( context,
-    //     CustomSnackBar.error(message: "Error connection with server!"),
-    //   );
-    // }
+    } on SocketException {
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
+    } catch (e) {
+      print("ERROR.........");
+      print(e);
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
+    }
     
   }
   
@@ -114,10 +115,9 @@ class _HomeState extends State<Home> {
     if (notificationData["notif_id"] != null) {
       final data = Data(
         pengumumanID: int.parse(notificationData["notif_id"]),
-        from: "xxx"
+        from: ""
       );
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanDetailPage(data)));
-      //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanDetailPage(int.parse(notificationData["notif_id"]))));
+      //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanDetailPage(data)));      
     }
   }
 
@@ -125,10 +125,10 @@ class _HomeState extends State<Home> {
   void initState() {
     firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        debugPrint('onMessage: $message');
-        showTopSnackBar( context,
-          CustomSnackBar.info(message: message["notification"]["title"]),
-        );
+        //debugPrint('onMessage: $message');
+        print("on Message yahh");
+        print(message);
+        //FlushbarHelper.createInformation(title: message["notification"]["title"] ,message: '',).show(context);        
       },
       onBackgroundMessage: onBackgroundMessage,
       onResume: (Map<String, dynamic> message) async {
@@ -171,7 +171,6 @@ class _HomeState extends State<Home> {
           children: <Widget>[
             Expanded(
               child: ListView(
-                padding: EdgeInsets.all(16),
                 children: <Widget>[
                   ColoredCard(
                     padding: 2,
@@ -224,165 +223,89 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 5,),
-                  if(role != 3) Card(
-                    color: Colors.green[100],
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BlokDetailPage(blok)));
-                      },
-                      child: Padding( 
-                        padding: EdgeInsets.all(10),
-                          child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text( "Blok anda", style: TextStyle( color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon"), textAlign: TextAlign.left,),
-                            Center(
-                              child: blok == "" ?
-                              CircularProgressIndicator(backgroundColor: Colors.white, ) :
-                              Text( "$blok", style: TextStyle( color: Colors.black, fontSize: 40, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                            ),
-                          ],
-                        )
-                      )
-                    )
+                  Divider(height: 1, color: Colors.white,),
+                  if(role != 3) ListTile(  
+                    tileColor: Colors.green[50],
+                    title: Text(
+                      "Blok anda", style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "mon"),
+                    ),
+                    subtitle: blok == "" ?
+                      null :
+                      Text( "$blok", style: TextStyle( color: Colors.black, fontSize: 20, fontFamily: "mon" ),                                        
+                    ),
+                    trailing: Icon(Icons.chevron_right, size: 26, color: Colors.green,),
+                    onTap: () {
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BlokDetailPage(blok)));
+                    }
                   ),
-                  if(role != 3) Card(         
-                    color: Colors.green[100],
-                    child: InkWell(
-                      onTap: () {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ContributionPage(from: "home")));
-                      },
-                      child: Padding( 
-                        padding: EdgeInsets.all(10),
-                          child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,                              
-                          children: <Widget>[
-                            Text( "Tagihan anda", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon" ), textAlign: TextAlign.left,),
-                            Center(
-                              child: tagihan == null ?
-                              CircularProgressIndicator(backgroundColor: Colors.white, ) :
-                              Text("$tagihan", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                            ),
-                            Center(
-                              child: Text( "kali", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                            ),
-                          ],
-                        )
-                      )
-                    )
+                  Divider(height: 1, color: Colors.green,),
+                  if(role != 3) ListTile(  
+                    tileColor: Colors.green[50],
+                    title: Text(
+                      "Tagihan anda", style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "mon"),
+                    ),
+                    subtitle: tagihan == null ?
+                      null :
+                      Text( "$tagihan kali", style: TextStyle( color: Colors.black, fontSize: 20, fontFamily: "mon" ),                                        
+                    ),
+                    trailing: Icon(Icons.chevron_right, size: 26, color: Colors.green),
+                    onTap: () {
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ContributionPage(from: "home")));
+                    }
                   ),
-                  Card(                                       
-                    color: Colors.green[100],
-                    child: InkWell(
-                      onTap: () {
-                          print("tapping info");
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Text( "Cash flow $bulan $tahun", style: TextStyle( fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                            SizedBox(height: 5),
-                            Row(
-                              children: <Widget>[
-                                Column(
-                                  children: <Widget>[
-                                    Text("Pemasukan",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                                    Text(
-                                      NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(pemasukan),
-                                      style: TextStyle( fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon" ),
-                                    ),
-                                  ],
-                                ),
-                                Spacer(flex: 1,),
-                                Column(
-                                  children: <Widget>[
-                                    Text("Pengeluaran",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                                    Text(
-                                      NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(pengeluaran),
-                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: "mon" ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Text("TOTAL", style: TextStyle( fontSize: 18, fontWeight: FontWeight.bold, fontFamily: "mon" ),),
-                                Text(
-                                  NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(total), 
-                                  style: TextStyle(
-                                    fontSize: 18, 
-                                    fontWeight: FontWeight.bold, 
-                                    fontFamily: "mon", 
-                                    color: (total < 0) ? Colors.red : Colors.blue 
-                                  ), 
-                                ),
-                            ],)
-                          ],
-                        )
-                      )
-                      
-                    )
-                  ),
-                  Card(
-                    color: Colors.green[100],
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BlokDetailPage(blok)));
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text( "Pengumuman", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "mon" )),
-                            SizedBox(height: 10),
-                            SizedBox(
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                physics: BouncingScrollPhysics(),
-                                itemCount: _pengumumanList.length,
-                                itemBuilder: (BuildContext context, int index){
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: <Widget>[
-                                      ListTile(
-                                        tileColor: _pengumumanList[index][3] == true ? Colors.green[200] : Colors.green[400],
-                                        title: Text(_pengumumanList[index][1],
-                                          style: TextStyle(fontFamily: "mon", fontWeight: FontWeight.bold),
-                                          overflow: TextOverflow.ellipsis,                                          
-                                        ),
-                                        subtitle: Text(_pengumumanList[index][2],
-                                          style: TextStyle(fontFamily: "mon",),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 2,
-                                        ),
-                                        onTap: () {
-                                          final data = Data(
-                                            pengumumanID: _pengumumanList[index][0],
-                                            from: "home"
-                                          );
-                                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PengumumanDetailPage(data)));                                          
-                                        },
-                                      ),
-                                      Divider(), //                           <-- Divider
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                          ],                        
+                  Divider(height: 1, color: Colors.green),
+                  ListTile(  
+                    tileColor: Colors.green[50],
+                    title: Text(
+                      "Cash flow $bulan $tahun", style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "mon"),
+                    ),
+                    subtitle: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text("TOTAL :", style: TextStyle( fontSize: 18, fontFamily: "mon", color: Colors.black ),),
+                        Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(total), 
+                            style: TextStyle(
+                            fontSize: 18, 
+                            fontFamily: "mon", 
+                            color: (total < 0) ? Colors.red : Colors.blue 
+                          ), 
                         ),
-                      ),
+                      ],
+                    ),
+                    trailing: Icon(Icons.chevron_right, size: 26, color: Colors.green,),
+                    onTap: () {
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ContributionPage(from: "home")));
+                    }
+                  ),
+                  Divider(height: 1, color: Colors.green,),                  
+                  Container(
+                    color: Colors.green[50],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 16,),
+                        Text( "Pengumuman", style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, fontFamily: "mon" )),                        
+                        SizedBox(height: 10),
+                        Divider(height: 1, color: Colors.green,),                        
+                        SizedBox(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: BouncingScrollPhysics(),
+                            itemCount: _pengumumanList.length,
+                            itemBuilder: (BuildContext context, int index){
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  PengumumanItem(_pengumumanList[index][0], _pengumumanList[index][1], _pengumumanList[index][2], _pengumumanList[index][3]),
+                                  Divider(height: 1, color: Colors.green,),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],                        
                     ),
                   ),
-                  
-                    
                 ],
               ),
             ),
@@ -391,10 +314,4 @@ class _HomeState extends State<Home> {
       )
     );
   }
-}
-
-class Data {
-  int pengumumanID;
-  String from;
-  Data({this.pengumumanID, this.from});
 }

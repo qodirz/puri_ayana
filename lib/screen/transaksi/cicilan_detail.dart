@@ -1,15 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/cicilan.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/tap_bounce_container.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class CicilanDetailPage extends StatefulWidget {  
   final int cicilanID;
@@ -39,7 +38,7 @@ class _CicilanDetailPageState extends State<CicilanDetailPage> {
   }
 
   getCicilanDetail() async {
-    //try{
+    try{
       final response = await http.get(NetworkURL.cicilanDetail(widget.cicilanID), 
       headers: <String, String>{ 
         'Content-Type': 'application/json; charset=UTF-8', 
@@ -70,17 +69,13 @@ class _CicilanDetailPageState extends State<CicilanDetailPage> {
           isLoading = false;
         });
       }  
-    // } on SocketException {
-    //   showTopSnackBar( context,
-    //     CustomSnackBar.error(message: "No Internet connection!"),
-    //   );
-    // } catch (e) {
-    //   print("ERROR.........");
-    //   print(e);
-    //   showTopSnackBar( context,
-    //     CustomSnackBar.error(message: "Error connection with server!"),
-    //   );
-    // }
+    } on SocketException {
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
+    } catch (e) {
+      print("ERROR.........");
+      print(e);
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
+    }
     
   }
  
@@ -100,8 +95,23 @@ class _CicilanDetailPageState extends State<CicilanDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.green[100], 
+    ));
+
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, size: 26),
+            onPressed: () {
+              Navigator.push(context,MaterialPageRoute(builder: (context) => CicilanPage()));
+            },
+          ), 
+          title: Text("CICILAN DETAIL", style: TextStyle(fontFamily: "mon")),
+          centerTitle: true,
+        ),
         body: RefreshIndicator(
           onRefresh: onRefresh,         
           child: Column(
@@ -109,31 +119,8 @@ class _CicilanDetailPageState extends State<CicilanDetailPage> {
             children: <Widget>[
               Expanded(
                 child: ListView(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(10),
                   children: <Widget>[
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          InkWell(
-                          onTap: () {
-                            Navigator.push(context,MaterialPageRoute(builder: (context) => CicilanPage()));                            
-                          },
-                          child: Icon(Icons.arrow_back, size: 30,),
-                          ),
-                          SizedBox(
-                            width: 4,
-                          ),
-                          Text(
-                            "CICILAN DETAIL",                       
-                            style: TextStyle(
-                              fontSize: 20, fontFamily: "mon"
-                            ),
-                          ),
-                          
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 40,),                    
                     isLoading == true ?
                       Container(      
                         height: 150,

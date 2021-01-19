@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -8,9 +9,6 @@ import 'package:puri_ayana_gempol/model/userModel.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/tap_bounce_container.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class BlokDetailPage extends StatefulWidget {
   final String blok;
@@ -62,16 +60,11 @@ class _BlokDetailPagePageState extends State<BlokDetailPage> {
       }else{
       }  
     } on SocketException {
-      print("ERROR.........");
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "No Internet connection!"),
-      );
+      FlushbarHelper.createError(title: 'Error',message: "No Internet connection!",).show(context);      
     } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: "Error connection with server!",).show(context);
       print("ERROR.........");
-      print(e);
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "Error connection with server!"),
-      );
+      print(e);      
     }
     
   }
@@ -98,7 +91,7 @@ class _BlokDetailPagePageState extends State<BlokDetailPage> {
             children: <Widget>[
               Expanded(
                 child: ListView(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(10),
                   children: <Widget>[
                     Container(
                       child: Row(

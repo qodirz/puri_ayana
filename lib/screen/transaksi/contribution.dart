@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/model/contributionModel.dart';
 import 'package:http/http.dart' as http;
@@ -9,9 +11,6 @@ import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/tap_bounce_container.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class ContributionPage extends StatefulWidget {
   final String from;
@@ -67,15 +66,11 @@ class _ContributionPageState extends State<ContributionPage> {
 
     } on SocketException {
       print("ERROR.........");
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "No Internet connection!"),
-      );
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);            
     } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
       print("ERROR.........");
-      print(e);
-      showTopSnackBar( context,
-        CustomSnackBar.error(message: "Error connection with server!"),
-      );
+      print(e);      
     }
     
   }
@@ -92,8 +87,27 @@ class _ContributionPageState extends State<ContributionPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.green[100], 
+    ));
+
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, size: 26),
+            onPressed: () {
+              if (widget.from == "home"){
+                Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
+              }else{
+                Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
+              }
+            },
+          ), 
+          title: Text("KONTRIBUSI", style: TextStyle(fontFamily: "mon")),
+          centerTitle: true,
+        ),
         body: Container(    
           child: RefreshIndicator(
             onRefresh: onRefresh,
@@ -102,30 +116,8 @@ class _ContributionPageState extends State<ContributionPage> {
               children: <Widget>[
                 Expanded(
                   child: ListView(
-                    padding: EdgeInsets.all(16),
-                    children: <Widget>[
-                      Container(
-                        child: Row(
-                          children: <Widget>[
-                            InkWell(
-                            onTap: () {
-                              if (widget.from == "home"){
-                                Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
-                              }else{
-                                Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
-                              }
-                            },
-                            child: Icon(Icons.arrow_back, size: 30,),
-                            ),
-                            SizedBox(width: 4, ),
-                            Text(
-                              "KONTRIBUSI",                              
-                              style: TextStyle(fontSize: 20, fontFamily: "mon" ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 20,),
+                    padding: EdgeInsets.all(10),
+                    children: <Widget>[                      
                       backgroundHeader(title, tagihan), 
                       _getBodyWidget(),                   
                     ],
