@@ -344,7 +344,7 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Align(
-                      alignment: Alignment.centerRight,
+                      alignment: Alignment.center,
                       child: Text(value, style: TextStyle(fontFamily: "mon", fontSize: 18),),
                     ),
                   );
@@ -394,7 +394,7 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Align(
-                      alignment: Alignment.centerRight,
+                      alignment: Alignment.center,
                       child: Text(value, style: TextStyle(fontFamily: "mon", fontSize: 18),),
                     ),
                   );

@@ -39,9 +39,13 @@ dependencies:
   form_field_validator: ^1.0.1
   horizontal_data_table: ^1.0.8 
   flutter_svg: 0.18.0
-  flushbar: ^1.10.2
+  flushbar: ^1.10.4
   flutter_masked_text: ^0.8.0
-
+  flutter_local_notifications: ^3.0.3
+  path_provider: ^1.6.7
+  rxdart: ^0.24.0
+  
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

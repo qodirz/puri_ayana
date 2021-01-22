@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:puri_ayana_gempol/custom/email_field.dart';
 import 'package:puri_ayana_gempol/custom/enter_exit_route.dart';
+import 'package:puri_ayana_gempol/custom/password_field.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/model/userModel.dart';
 import 'package:puri_ayana_gempol/screen/forgot_password.dart';
@@ -11,7 +13,6 @@ import 'package:puri_ayana_gempol/model/loginModel.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
 import 'package:http/http.dart' as http;
-import 'package:form_field_validator/form_field_validator.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class Login extends StatefulWidget {
@@ -19,19 +20,8 @@ class Login extends StatefulWidget {
   _LoginState createState() => _LoginState();
 }
 
-class _LoginState extends State<Login> {
-  final emailValidator = MultiValidator([
-    RequiredValidator(errorText: 'email harus di isi!'),
-    EmailValidator(errorText: 'isi email dengan benar')
-  ]);  
- 
-  final passwordValidator = MultiValidator([  
-    RequiredValidator(errorText: 'password harus di isi!'),  
-    MinLengthValidator(8, errorText: 'sandi harus terdiri dari minimal 8 digit'),  
-    PatternValidator(r'([0-9])', errorText: 'kata sandi harus memiliki setidaknya satu angka')  
-  ]); 
-
-  TextEditingController usernameController = TextEditingController();
+class _LoginState extends State<Login> { 
+  TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   LoginModel loginModel;
   UserModel userModel;
@@ -77,30 +67,23 @@ class _LoginState extends State<Login> {
 
     await firebaseMessaging.getToken().then((token) => setState(() {
       this.deviceToken = token;
-      print("get token");
-      print(token);
     }));
     if (Platform.isIOS) {
       deviceType = "iphone";
     } else if (Platform.isAndroid) {
       deviceType = "android";
     }
-    print("on login");
-    print(deviceToken);
-    print(deviceType);
     final response = await http.post(NetworkURL.login(), 
     headers: <String, String>{ 
       'Content-Type': 'application/json; charset=UTF-8', 
     },body: jsonEncode(<String, String>{        
-      "email": usernameController.text.trim(),
+      "email": emailController.text.trim(),
       "password": passwordController.text.trim(),
       "device_token": deviceToken,
       "device_type": deviceType  
     }));
     
     final responJson = json.decode(response.body);
-    print("after login");
-    print(responJson);
     Navigator.pop(context);
     if (response.headers['access-token'] != null) {
       
@@ -195,71 +178,10 @@ class _LoginState extends State<Login> {
                         ],)
                       ),
                       SizedBox(height: 80,),
-                      TextFormField(  
-                        validator: emailValidator,                      
-                        controller: usernameController,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          filled: true,
-                          fillColor: Colors.white,
-                            hintText: "Email",
-                            hintStyle: TextStyle(fontFamily: "mon"),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide:  BorderSide(color: Colors.green[400] ),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide: BorderSide(color: Colors.green)
-                            ),
-                            errorStyle: TextStyle(color: Colors.red),
-                          ),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
-                      TextFormField(
-                        validator: passwordValidator,
-                        controller: passwordController,
-                        obscureText: obSecure,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Password",
-                            hintStyle: TextStyle(fontFamily: "mon"),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide:  BorderSide(color: Colors.green[400] ),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide: BorderSide(color: Colors.green)
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                obSecure ? Icons.visibility_off : Icons.visibility,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  obSecure = !obSecure;
-                                });
-                              },
-                            ),
-                            errorStyle: TextStyle(color: Colors.red),
-                          ),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
+                      EmailField(controller: emailController, hintText: "Email",),
+                      SizedBox(height: 16),
+                      PasswordField(controller: passwordController, hintText: "Password",),                      
+                      SizedBox(height: 16),
                       InkWell(
                         onTap: () {
                           cek();
@@ -269,9 +191,7 @@ class _LoginState extends State<Login> {
                           color: Colors.green[400],
                         ),
                       ),
-                      SizedBox(
-                        height: 16,
-                      ),
+                      SizedBox(height: 16,),
                       InkWell(
                         onTap: () {
                           Navigator.push(context,EnterExitRoute(exitPage: Login(), enterPage: ForgotPassword()));                          

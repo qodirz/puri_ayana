@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:puri_ayana_gempol/custom/email_field.dart';
 import 'package:puri_ayana_gempol/custom/enter_exit_route.dart';
 import 'package:puri_ayana_gempol/screen/login.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
@@ -15,10 +16,6 @@ class ForgotPassword extends StatefulWidget {
 }
 
 class _ForgotPasswordState extends State<ForgotPassword> {
-  final emailValidator = MultiValidator([
-    RequiredValidator(errorText: 'email is required'),
-    EmailValidator(errorText: 'enter a valid email address')
-  ]);  
   TextEditingController emailController = TextEditingController();
   
   final _key = GlobalKey<FormState>();
@@ -106,33 +103,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         ],)
                       ),                      
                       SizedBox(height: 80,),
-                      TextFormField(      
-                        validator: emailValidator,                          
-                        controller: emailController,
-                        decoration: InputDecoration(
-                          errorStyle: TextStyle(color: Colors.red),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          filled: true,
-                          fillColor: Colors.white,
-                            hintText: "Email",
-                            hintStyle: TextStyle(fontFamily: "mon"),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide:  BorderSide(color: Colors.green[400] ),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide: BorderSide(color: Colors.green)
-                            ),
-                          ),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
+                      EmailField(controller: emailController, hintText: "Email",),                      
+                      SizedBox(height: 16,),
                       InkWell(
                         onTap: () {
                           cek();
@@ -142,9 +114,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           color: Colors.green[400],
                         ),
                       ),
-                      SizedBox(
-                        height: 16,
-                      ),
+                      SizedBox(height: 16,),
                       InkWell(
                         onTap: () {
                           Navigator.push(context,EnterExitRoute(exitPage:  ForgotPassword(), enterPage: Login()));                          

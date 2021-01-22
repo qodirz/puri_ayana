@@ -79,8 +79,6 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
     }));
     
     final responJson = json.decode(response.body);
-    print("addTransaction ===========================");
-    print(responJson);
     if(responJson["success"] == true){   
       FlushbarHelper.createSuccess(title: 'Berhasil',message: responJson["message"],).show(context);                    
       setState(() {

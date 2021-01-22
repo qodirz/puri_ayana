@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:puri_ayana_gempol/custom/password_field.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
@@ -90,8 +91,6 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
     }));
 
     final responJson = json.decode(response.body);
-    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-    print(responJson);
     if (responJson != null) {
       Navigator.pop(context);
       showDialog(
@@ -150,79 +149,11 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
                   child: ListView(
                     padding: EdgeInsets.all(10),
                     children: <Widget>[
-                      SizedBox(height: 20,),                          
-                      TextFormField(
-                        validator: currentPasswordValidator,
-                        controller: currentPasswordController,
-                        obscureText: obSecureCurrentPwd,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Password saat ini",
-                            hintStyle: TextStyle(fontFamily: "mon"),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide:  BorderSide(color: Colors.green[400] ),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide: BorderSide(color: Colors.green)
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                obSecureCurrentPwd ? Icons.visibility_off : Icons.visibility,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  obSecureCurrentPwd = !obSecureCurrentPwd;
-                                });
-                              },
-                            )),
-                      ),                      
-                      SizedBox(
-                        height: 16,
-                      ),
-                      TextFormField(
-                        validator: newPasswordValidator,
-                        controller: passwordController,
-                        obscureText: obSecurePwd,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Password",
-                            hintStyle: TextStyle(fontFamily: "mon"),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide:  BorderSide(color: Colors.green[400] ),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide: BorderSide(color: Colors.green)
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                obSecurePwd ? Icons.visibility_off : Icons.visibility,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  obSecurePwd = !obSecurePwd;
-                                });
-                              },
-                            )),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
+                      SizedBox(height: 20,),   
+                      PasswordField(controller: currentPasswordController, hintText: "Password saat ini",),                                                              
+                      SizedBox(height: 16,),
+                      PasswordField(controller: currentPasswordController, hintText: "Password",),                       
+                      SizedBox(height: 16,),
                       TextFormField(
                         validator: (val) => MatchValidator(errorText: 'passwords tidak sama').validateMatch(val, passwordConfirmationController.text),       
                         controller: passwordConfirmationController,
@@ -256,9 +187,7 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
                               },
                             )),
                       ),
-                      SizedBox(
-                        height: 16,
-                      ),
+                      SizedBox(height: 16,),
                       InkWell(
                         onTap: () {
                           cek();

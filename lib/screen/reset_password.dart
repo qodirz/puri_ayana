@@ -2,7 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:puri_ayana_gempol/custom/custom_number_field.dart';
+import 'package:puri_ayana_gempol/custom/email_field.dart';
 import 'package:puri_ayana_gempol/custom/enter_exit_route.dart';
+import 'package:puri_ayana_gempol/custom/password_field.dart';
 import 'package:puri_ayana_gempol/screen/login.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
@@ -15,16 +18,7 @@ class ResetPassword extends StatefulWidget {
 }
 
 class _ResetPasswordState extends State<ResetPassword> {
-   final emailValidator = MultiValidator([
-    RequiredValidator(errorText: 'email is required'),
-    EmailValidator(errorText: 'enter a valid email address')
-  ]);   
-  final passwordValidator = MultiValidator([  
-    RequiredValidator(errorText: 'password is required'),  
-    MinLengthValidator(8, errorText: 'password must be at least 8 digits long'),  
-    PatternValidator(r'([0-9])', errorText: 'passwords must have at least one number')  
-  ]); 
-
+  
   TextEditingController emailController = TextEditingController();
   TextEditingController tokenController = TextEditingController();
   TextEditingController newPasswordController = TextEditingController();
@@ -121,98 +115,12 @@ class _ResetPasswordState extends State<ResetPassword> {
                         ],)
                       ),                      
                       SizedBox(height: 80,),
-                      TextFormField(  
-                        validator: emailValidator,                     
-                        controller: emailController,
-                        decoration: InputDecoration(
-                          errorStyle: TextStyle(color: Colors.red),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Email",
-                          hintStyle: TextStyle(fontFamily: "mon"),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide:  BorderSide(color: Colors.green[400] ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide: BorderSide(color: Colors.green)
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
-                      TextFormField(
-                        validator: RequiredValidator(errorText: 'token is required'),  
-                        keyboardType: TextInputType.number,
-                        controller: tokenController,
-                        decoration: InputDecoration(
-                          errorStyle: TextStyle(color: Colors.red),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Token",
-                          hintStyle: TextStyle(fontFamily: "mon"),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide:  BorderSide(color: Colors.green[400] ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide: BorderSide(color: Colors.green)
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
-                      TextFormField(
-                        validator: passwordValidator,
-                        controller: newPasswordController,
-                        obscureText: obSecure,
-                        decoration: InputDecoration(
-                          errorStyle: TextStyle(color: Colors.red),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Password Baru",
-                            hintStyle: TextStyle(fontFamily: "mon"),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide:  BorderSide(color: Colors.green[400] ),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide: BorderSide(color: Colors.green)
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                obSecure ? Icons.visibility_off : Icons.visibility,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  obSecure = !obSecure;
-                                });
-                              },
-                            )),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
+                      EmailField(controller: emailController, hintText: "Email",),
+                      SizedBox(height: 16,),
+                      CustomNumberField(controller: tokenController, hintText: "Token",),
+                      SizedBox(height: 16,),
+                      PasswordField(controller: newPasswordController, hintText: "Password",),
+                      SizedBox(height: 16,),
                       TextFormField(
                         validator: (val) => MatchValidator(errorText: 'passwords tidak sama').validateMatch(val, newPasswordController.text),       
                         controller: newPasswordConfirmationController,
@@ -223,17 +131,25 @@ class _ResetPasswordState extends State<ResetPassword> {
                             fillColor: Colors.white,
                             hintText: "Password Konfirmasi",
                             hintStyle: TextStyle(fontFamily: "mon"),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                              borderSide: BorderSide(color: Colors.green, width: 2),              
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(16.0)),
+                              borderSide: BorderSide(color: Colors.green, width: 2),              
+                            ),
                             border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green),
+                              borderSide: BorderSide(color: Colors.green[300]),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: new BorderRadius.circular(16.0),
-                              borderSide:  BorderSide(color: Colors.green[400] ),
+                              borderSide:  BorderSide(color: Colors.green[300]),
                             ),
                             errorBorder: OutlineInputBorder(
                               borderRadius: new BorderRadius.circular(16.0),
-                              borderSide: BorderSide(color: Colors.green)
+                              borderSide: BorderSide(color: Colors.green[300])
                             ),
                             suffixIcon: IconButton(
                               icon: Icon(
@@ -246,9 +162,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                               },
                             )),
                       ),
-                      SizedBox(
-                        height: 16,
-                      ),
+                      SizedBox(height: 16,),
                       InkWell(
                         onTap: () {
                           cek();
@@ -258,9 +172,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                           color: Colors.green[400],
                         ),
                       ),
-                      SizedBox(
-                        height: 16,
-                      ),
+                      SizedBox(height: 16,),
                       InkWell(
                         onTap: () {
                           Navigator.push(context,EnterExitRoute(exitPage:  ResetPassword(), enterPage: Login()));                          

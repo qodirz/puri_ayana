@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:line_icons/line_icons.dart';
+import 'package:puri_ayana_gempol/custom/custom_number_field.dart';
+import 'package:puri_ayana_gempol/custom/custom_text_field.dart';
+import 'package:puri_ayana_gempol/custom/email_field.dart';
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/model/userModel.dart';
@@ -28,9 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
   UserModel userModel;
   String accessToken, uid, expiry, client, email, name, phoneNumber, picBlok, avatar;
   int role, addressId;
-  final emailValidator = RequiredValidator(errorText: 'Email harus di isi!');  
-  final nameValidator = RequiredValidator(errorText: 'Nama harus di isi!');  
-  final phoneValidator = RequiredValidator(errorText: 'Telpon harus di isi!');  
+ 
   final _key = GlobalKey<FormState>();
   var obSecureCurrentPwd = true;
   var obSecurePwd = true;
@@ -44,15 +45,8 @@ class _ProfilePageState extends State<ProfilePage> {
     });    
   }
 
-
   getPref() async {
-    print("masuk get pref");
-
     SharedPreferences pref = await SharedPreferences.getInstance();
-    
-    print(pref.getString("email"));
-    print(pref.getString("avatar"));
-    
     setState(() {
       accessToken = pref.getString("accessToken");
       uid = pref.getString("uid");
@@ -80,9 +74,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   submit() async {
-    print("submitted");
-    print(emailController.text);
-    print(nameController.text);
     FocusScope.of(context).requestFocus(new FocusNode());    
     showDialog(
       context: context,
@@ -93,9 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               CircularProgressIndicator(),
-              SizedBox(
-                height: 16,
-              ),
+              SizedBox(height: 16,),
               Text("Please wait...")
             ],
           ),
@@ -126,13 +115,8 @@ class _ProfilePageState extends State<ProfilePage> {
       var response = await request.send();
       response.stream.transform(utf8.decoder).listen((a) {
         final data = jsonDecode(a);
-        print("Update profile  xxxxxxxxxxxxx");
-        print(data);
         if (data['success'] == true) {
           userModel = UserModel.fromJson(data["me"]); 
-          print(userModel.avatar);
-          print(userModel.email);
-          print(userModel.name);
           savePref(
             userModel.email,
             userModel.name,
@@ -209,122 +193,53 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: ListView(
                     padding: EdgeInsets.all(10),
                     children: <Widget>[
-                      Center(
-                        child: Container(
-                          height: 200,
-                          width: 200,
-                          decoration: BoxDecoration(
-                            border:Border.all(width: 1, color: Colors.white),
-                            shape: BoxShape.circle,                                                      
-                          ),
-                          child: CircleAvatar(
-                            backgroundColor: Colors.green[300],
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(100),
-                              child: profileAvatar(avatar, _image),                              
+                      SizedBox(height: 20,),
+                      Stack(
+                        fit: StackFit.loose,
+                        children: <Widget>[
+                          Center(
+                            child: Container(
+                              height: 200,
+                              width: 200,
+                              decoration: BoxDecoration(
+                                border:Border.all(width: 1, color: Colors.green[50]),
+                                shape: BoxShape.circle,                                                      
+                              ),
+                              child: CircleAvatar(
+                                backgroundColor: Colors.green[300],
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: profileAvatar(avatar, _image),                              
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      Center(
-                        child: InkWell(                          
-                          onTap: pilihGallery,
-                          child: Text(
-                            "ubah avatar",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontFamily: "mon",
-                              color: Colors.green
+                          Positioned(
+                            bottom: 0,
+                            right: 80,
+                            child: Center(
+                              child: InkWell(                          
+                                onTap: pilihGallery,
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.green[200],
+                                  radius: 25.0,
+                                  child: new Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              ),
                             ),
                           ),
-                        )
-                        
-                      ),                                        
-                      SizedBox(
-                        height: 40,
+                        ]
                       ),
-                      TextFormField(                        
-                        validator: emailValidator,
-                        controller: emailController,
-                        decoration: InputDecoration( 
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Email",
-                          hintStyle: TextStyle(fontFamily: "mon"),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide:  BorderSide(color: Colors.green[400] ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide: BorderSide(color: Colors.green)
-                          ),
-                          errorStyle: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
-                      TextFormField(
-                        validator: nameValidator,         
-                        controller: nameController,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Nama",
-                          hintStyle: TextStyle(fontFamily: "mon"),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide:  BorderSide(color: Colors.green[400] ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide: BorderSide(color: Colors.green)
-                          ),
-                          errorStyle: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
-                      TextFormField(
-                        validator: phoneValidator,                    
-                        keyboardType: TextInputType.number,    
-                        controller: phoneNumberController,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Telpon",
-                          hintStyle: TextStyle(fontFamily: "mon"),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide:  BorderSide(color: Colors.green[400] ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide: BorderSide(color: Colors.green)
-                          ),
-                          errorStyle: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 16,
-                      ),
+                      SizedBox(height: 40,),
+                      EmailField(controller: emailController, hintText: "Email",),
+                      SizedBox(height: 16,),
+                      CustomTextField(controller: nameController, hintText: "Nama"),
+                      SizedBox(height: 16,),
+                      CustomNumberField(controller: phoneNumberController, hintText: "Telpon"),
+                      SizedBox(height: 16,),
                       InkWell(
                         onTap: () {
                           cek();

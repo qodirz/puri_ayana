@@ -88,5 +88,9 @@ class NetworkURL {
   static String newUser(){
     return "$server/api/v1/users/new";
   }
+
+  static String cashTransactions(String month, String year){
+    return "$server/api/v1/cash_transactions/$month/$year";
+  }
   
 }

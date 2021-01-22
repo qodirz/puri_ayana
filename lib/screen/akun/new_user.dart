@@ -60,8 +60,6 @@ class _NewUserPageState extends State<NewUserPage> {
     }));
 
     final responJson = json.decode(response.body);
-    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-    print(responJson);
     if (responJson != null) {
       Navigator.pop(context);
       

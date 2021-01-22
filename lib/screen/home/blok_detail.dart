@@ -82,6 +82,17 @@ class _BlokDetailPagePageState extends State<BlokDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, size: 26),
+          onPressed: () {
+            Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));            
+          },
+        ), 
+        title: Text("Blok Info "+ widget.blok, style: TextStyle(fontFamily: "mon")),
+        centerTitle: true,
+      ),
       backgroundColor: Colors.white,
       body: SafeArea(    
         child: RefreshIndicator(
@@ -93,28 +104,6 @@ class _BlokDetailPagePageState extends State<BlokDetailPage> {
                 child: ListView(
                   padding: EdgeInsets.all(10),
                   children: <Widget>[
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          InkWell(
-                          onTap: () {
-                            Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
-                          },
-                          child: Icon(Icons.arrow_back, size: 30,),
-                          ),
-                          SizedBox(
-                            width: 4,
-                          ),
-                          Text(
-                            "Blok Info "+ widget.blok,                       
-                            style: TextStyle(
-                              fontSize: 20, fontFamily: "mon"
-                            ),
-                          ),
-                          
-                        ],
-                      ),
-                    ),
                     SizedBox(height: 20,),
                     backgroundHeader(tagihan, contribution), 
                     _getBodyWidget(),                   
@@ -126,7 +115,6 @@ class _BlokDetailPagePageState extends State<BlokDetailPage> {
         ),
       ),
     );
-    
   }
 
   Widget _getBodyWidget() {

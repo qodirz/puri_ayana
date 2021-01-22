@@ -5,6 +5,7 @@ import 'package:puri_ayana_gempol/screen/transaksi/contribution.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/hutang.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/iuran_bulanan.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/tambah_transaksi.dart';
+import 'package:puri_ayana_gempol/screen/transaksi/transaksi_bulanan.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TransaksiPage extends StatefulWidget {
@@ -49,7 +50,7 @@ class _TransaksiPageState extends State<TransaksiPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   cardList('CASHFLOW PERTAHUN', "cashflow", context),
-                  cardList('TRANSAKSI BULANAN', "", context),
+                  cardList('TRANSAKSI BULANAN', "transaksi_bulanan", context),
                   if (role != 3) cardList('DATA IURAN', "data_iuran", context),
                   if (hasDebt == true) cardList('HUTANG SAYA', "hutang", context),
                   cardList('CICILAN', "cicilan", context),
@@ -79,6 +80,8 @@ Widget cardList(title, page, context) {
           print(page);
           if (page == "cashflow"){
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CashflowPertahunPage()));  
+          }else if (page == "transaksi_bulanan"){
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => TransaksiBulananPage()));
           }else if (page == "data_iuran"){
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ContributionPage()));
           }else if (page == "hutang"){

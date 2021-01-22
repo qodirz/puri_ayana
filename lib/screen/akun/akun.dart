@@ -87,7 +87,6 @@ class _AkunPageState extends State<AkunPage> {
     final data = jsonDecode(response.body);
     
     if (data['success'] == true) {
-      print("sukses logout");
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.clear();    
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Login()), 
@@ -136,7 +135,7 @@ class _AkunPageState extends State<AkunPage> {
                 children: <Widget>[
                   cardList('PROFIL', "profile", context),
                   cardList('UBAH PASSWORD', "update_password", context),
-                  if (role == 2 || role == 3) cardList('BUAT USER BARU', "new_user", context),
+                  if ( false == true && role == 2 && role == 3) cardList('BUAT USER BARU', "new_user", context),
                   ListTile(  
                     tileColor: Colors.redAccent,
                     title: Text(

@@ -16,7 +16,7 @@ class DataWargaPage extends StatefulWidget {
 
 class _DataWargaPageState extends State<DataWargaPage>
 {
-  Widget appBarTitle = new Text("DATA WARGA", style: new TextStyle(color: Colors.white),);
+  Widget appBarTitle = new Text("DATA WARGAx", style: new TextStyle(color: Colors.white),);
   Icon actionIcon = new Icon(Icons.search, color: Colors.white,);
   final key = new GlobalKey<ScaffoldState>();
   final TextEditingController _searchQuery = new TextEditingController();
@@ -40,7 +40,7 @@ class _DataWargaPageState extends State<DataWargaPage>
     getUsers();
   }
 
-  _SearchListState() {
+  _DataWargaPageState() {
     _searchQuery.addListener(() {
       if (_searchQuery.text.isEmpty) {
         setState(() {
@@ -162,12 +162,11 @@ class _DataWargaPageState extends State<DataWargaPage>
                 controller: _searchQuery,
                 style: new TextStyle(
                   color: Colors.white,
-
                 ),
                 decoration: new InputDecoration(
-                    prefixIcon: new Icon(Icons.search, color: Colors.white),
-                    hintText: "Search...",
-                    hintStyle: TextStyle(fontFamily: "mon", color: Colors.white),
+                  prefixIcon: new Icon(Icons.search, color: Colors.white),
+                  hintText: "Search...",
+                  hintStyle: TextStyle(fontFamily: "mon", color: Colors.white),
                 ),
               );
               _handleSearchStart();
@@ -191,7 +190,7 @@ class _DataWargaPageState extends State<DataWargaPage>
     setState(() {
       this.actionIcon = new Icon(Icons.search, color: Colors.white,);
       this.appBarTitle =
-      new Text("DATA WARGA", style: new TextStyle(color: Colors.white),);
+      new Text("DATA WARGAx", style: new TextStyle(color: Colors.white),);
       _isSearching = false;
       _searchQuery.clear();
     });

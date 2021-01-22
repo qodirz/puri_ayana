@@ -6,32 +6,29 @@ import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:http/http.dart' as http;
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
-import 'package:puri_ayana_gempol/model/cashflowModel.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class CashflowPertahunPage extends StatefulWidget {
-  final String from;
-  const CashflowPertahunPage({this.from});
-
+class TransaksiBulananPage extends StatefulWidget {
   @override
-  _CashflowPertahunPageState createState() => _CashflowPertahunPageState();
+  _TransaksiBulananPageState createState() => _TransaksiBulananPageState();
 }
 
-class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
-  List<CashflowModel> _cashflowList = [];
+class _TransaksiBulananPageState extends State<TransaksiBulananPage> {
+  List<Map<dynamic, dynamic>> _transactionList = [] ;
 
-  String accessToken, uid, expiry, client, title, cashflowYear; 
-  dynamic totalCashIn = 0; 
-  dynamic totalCashOut = 0;
+  String accessToken, uid, expiry, client, title, transactionMonth, transactionYear; 
+  dynamic debitTotal = 0; 
+  dynamic creditTotal = 0;
   dynamic grandTotal = 0;
   bool isLoading = false;
   
   getPref() async {
     var date = new DateTime.now().toString(); 
     var dateParse = DateTime.parse(date); 
+    var month = dateParse.month.toString(); 
     var year = dateParse.year.toString();
 
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -40,15 +37,16 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
       uid = pref.getString("uid");
       expiry = pref.getString("expiry");
       client = pref.getString("client");
-      cashflowYear = year;
+      transactionMonth = month;
+      transactionYear = year;
     });
-    getCashFlows(cashflowYear);
+    getTransactionPerMonth(month, year);
   }
 
-  getCashFlows(year) async {
+  getTransactionPerMonth(month, year) async {
     try{
-      _cashflowList.clear();    
-      final response = await http.get(NetworkURL.cashFlow(year), 
+      _transactionList.clear();
+      final response = await http.get(NetworkURL.cashTransactions(month.toString(), year.toString()), 
       headers: <String, String>{ 
         'Content-Type': 'application/json; charset=UTF-8', 
         'access-token': accessToken,
@@ -60,20 +58,25 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
       
       final responJson = json.decode(response.body);
       if(responJson["success"] == true){
-        final data = responJson["cash_flows"];
+        final data = responJson["transactions"];
         setState(() {
           isLoading = false;
           title = responJson["title"];
-          totalCashIn = responJson["total_cash_in"];
-          totalCashOut = responJson["total_cash_out"];
+          debitTotal = responJson["debit_total"];
+          creditTotal = responJson["credit_total"];
           grandTotal = responJson["grand_total"];
           for (Map i in data) {
-            _cashflowList.add(CashflowModel.fromJson(i));
+            _transactionList.add({
+              'type': i["type"], 
+              'transaction_date': i["transaction_date"], 
+              'description': i["description"],
+              'total': i["total"]
+            });
           }          
         });
       }else{
 
-      }
+      }  
 
     } on SocketException {
       FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
@@ -81,7 +84,7 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
       print("ERROR.........");
       print(e);
       FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
-    }  
+    }
   }
 
   @override
@@ -103,14 +106,10 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
-              if (widget.from == "home"){
-                Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
-              }else{
-                Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
-              }
+              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
             },
           ), 
-          title: Text("CASHFLOW PERTAHUN", style: TextStyle(fontFamily: "mon")),
+          title: Text("TRANSAKSI BULANAN", style: TextStyle(fontFamily: "mon")),
           centerTitle: true,
         ),
         body: Container(         
@@ -146,7 +145,7 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
         )
       );
     }else{
-      if(totalCashIn == 0){
+      if(grandTotal == null){
         return Container(      
           height: 100,
           color: Colors.green[50],
@@ -156,15 +155,15 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
         );  
       }else{
         return Container(      
-          height: (MediaQuery.of(context).size.height - 350),
+          height: (MediaQuery.of(context).size.height - 370),
           child: HorizontalDataTable(
-            leftHandSideColumnWidth: 100,
-            rightHandSideColumnWidth: 450,
+            leftHandSideColumnWidth: 0,
+            rightHandSideColumnWidth: 340,
             isFixedHeader: true,
             headerWidgets: _getTitleWidget(),
             leftSideItemBuilder: _generateFirstColumnRow,
             rightSideItemBuilder: _generateRightHandSideColumnRow,
-            itemCount: _cashflowList.length,
+            itemCount: _transactionList.length,
             rowSeparatorWidget: const Divider(
               color: Colors.cyan,
               height: 1.0,
@@ -181,10 +180,10 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
 
   List<Widget> _getTitleWidget() {
     return [      
-      _getTitleItemWidget('Bulan', 100),      
-      _getTitleItemWidget('Cash In', 150),
-      _getTitleItemWidget('Cash Out', 150),
-      _getTitleItemWidget('Total', 150),
+      _getTitleItemWidget('', 0),
+      _getTitleItemWidget('Date', 80),
+      _getTitleItemWidget('Description', 150),
+      _getTitleItemWidget('Total', 110),
     ];
   }
 
@@ -201,12 +200,8 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
 
   Widget _generateFirstColumnRow(BuildContext context, int index) {
     return Container(
-      color: Colors.green[100],
-      child: Text(_cashflowList[index].month.toString()),
-      width: 50,
-      height: 52,
-      padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-      alignment: Alignment.centerLeft,
+      child: Text("", style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "mon")),
+      width: 0,
     );
   }
 
@@ -214,23 +209,24 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
     return Row(
       children: <Widget>[       
         Container(
-          child: Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_cashflowList[index].cashIn)),
+          child: Text(_transactionList[index]["transaction_date"]),
+          width: 80,
+          height: 52,
+          padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+          alignment: Alignment.centerLeft,
+        ),
+        Container(
+          child: Text(_transactionList[index]["description"]),
           width: 150,
           height: 52,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
           alignment: Alignment.centerLeft,
         ),
         Container(
-          child: Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_cashflowList[index].cashOut)),
-          width: 150,
-          height: 52,
-          padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-          alignment: Alignment.centerLeft,
-        ),
-        Container(
-          child: _cashflowList[index].total < 0 ? Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_cashflowList[index].total), style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)) : 
-            Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_cashflowList[index].total), style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
-          width: 150,
+          child: _transactionList[index]["type"] == "cash_in" ? 
+            Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_transactionList[index]["total"]), style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)) : 
+            Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_transactionList[index]["total"]), style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          width: 110,
           height: 52,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
           alignment: Alignment.centerLeft,
@@ -251,9 +247,9 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
                 color: Colors.green[300],
                 child: Column(children: <Widget>[
                   SizedBox(height: 10),
-                  Text("Total Cash in", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: "mon")),
-                  totalCashIn < 0 ? Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(totalCashIn), style: TextStyle(color: Colors.red[100], fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")) : 
-                  Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(totalCashIn), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")),
+                  Text("Debit Total", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: "mon")),
+                  debitTotal < 0 ? Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(debitTotal), style: TextStyle(color: Colors.red[100], fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")) : 
+                  Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(debitTotal), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")),
                 ],)
               ),
             ),
@@ -263,9 +259,9 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
                 color: Colors.green[300],
                 child: Column(children: <Widget>[
                   SizedBox(height: 10),
-                  Text("Total Cash Out", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: "mon")),
-                  totalCashIn < 0 ? Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(totalCashOut), style: TextStyle(color: Colors.red[100], fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")) : 
-                  Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(totalCashOut), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")),
+                  Text("Credit Total", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: "mon")),
+                  creditTotal < 0 ? Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(creditTotal), style: TextStyle(color: Colors.red[100], fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")) : 
+                  Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(creditTotal), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")),
                 ],)
               ),
             )
@@ -309,7 +305,7 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
         ),
         color: Colors.green
       ),
-      height: 120,
+      height: 140,
       width: double.infinity,  
       child: Padding(
         padding: const EdgeInsets.all(10),
@@ -331,12 +327,18 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
               children: <Widget>[
                 MaterialButton(
                   onPressed: () {
-                    int year = int.parse(cashflowYear) - 1;
                     setState(() {
-                      cashflowYear = year.toString();
+                      int month = int.parse(transactionMonth) - 1;
+                      if(month == 0){                        
+                        transactionMonth = "12";                      
+                        int year = int.parse(transactionYear) - 1;
+                        transactionYear = year.toString();
+                      }else{
+                        transactionMonth = month.toString();
+                      }
                       isLoading = true;
                     });                    
-                    getCashFlows(year.toString());
+                    getTransactionPerMonth(transactionMonth, transactionYear);
                   },
                   shape: const StadiumBorder(),
                   color: Colors.green[200],
@@ -347,12 +349,18 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
                 ),
                 MaterialButton(
                   onPressed: () {
-                    int year = int.parse(cashflowYear) + 1;
                     setState(() {
-                      cashflowYear = year.toString();
+                      int month = int.parse(transactionMonth) + 1; 
+                      if(month == 13){
+                        transactionMonth = "1";
+                        int year = int.parse(transactionYear) + 1;
+                        transactionYear = year.toString();
+                      }else{
+                        transactionMonth = month.toString();
+                      }
                       isLoading = true;
                     });                    
-                    getCashFlows(year.toString());
+                    getTransactionPerMonth(transactionMonth.toString(), transactionYear.toString());
                   },
                   shape: const StadiumBorder(),
                   color: Colors.green[200],
