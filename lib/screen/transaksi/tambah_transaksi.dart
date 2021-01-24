@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
@@ -8,7 +9,6 @@ import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 
@@ -18,7 +18,7 @@ class TambahTransaksiPage extends StatefulWidget {
 }
 
 class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
-  //TextEditingController totalController = TextEditingController();
+  final storage = new FlutterSecureStorage();
   final totalController = new MoneyMaskedTextController(leftSymbol: "Rp " ,precision: 0);
   TextEditingController descriptionController = TextEditingController();  
   String paymentGroupOption = 'PEMASUKAN LAINNYA';
@@ -33,14 +33,17 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
   int selectedPayment = 1;
   bool isloading = false, tglError = false;
 
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
     setState(() {
-      accessToken = pref.getString("accessToken");      
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");
-    });
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;
+    });       
   }
 
   final _key = GlobalKey<FormState>();
@@ -96,8 +99,8 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
  
   @override
   void initState() {
-    getPref();
     super.initState();
+    getStorage();
   }
 
   @override

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
@@ -9,7 +10,6 @@ import 'package:puri_ayana_gempol/model/contributionModel.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class ContributionPage extends StatefulWidget {
@@ -21,19 +21,24 @@ class ContributionPage extends StatefulWidget {
 }
 
 class _ContributionPageState extends State<ContributionPage> {
+  final storage = new FlutterSecureStorage();
   List<ContributionModel> _contributionList = [];
 
   String accessToken, uid, expiry, client, title, tagihan; 
   ContributionModel contributionModel; 
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
     setState(() {
-      accessToken = pref.getString("accessToken");      
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");
-    });
-    getContributions();
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;
+    });    
+    getContributions();   
   }
 
   getContributions() async {
@@ -68,21 +73,19 @@ class _ContributionPageState extends State<ContributionPage> {
       print("ERROR.........");
       FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);            
     } catch (e) {
-      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
-      print("ERROR.........");
       print(e);      
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
     }
-    
   }
 
   Future<void> onRefresh() async {
-    getPref();
+    getContributions();
   }
  
   @override
   void initState() {
-    getPref();
-    super.initState();    
+    super.initState();
+    getStorage();    
   }
 
   @override

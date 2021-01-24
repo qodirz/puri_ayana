@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/custom/local_notification.dart';
@@ -12,7 +13,6 @@ import 'package:puri_ayana_gempol/screen/info/pengumuman_detail.dart';
 import 'package:puri_ayana_gempol/screen/login.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/cashflow_pertahun.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/contribution.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -30,32 +30,38 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {  
   final firebaseMessaging = FirebaseMessaging();
-  String accessToken, uid, expiry, client, name, avatar;
-  int notifID, role;
+  final storage = new FlutterSecureStorage();
+  String accessToken, uid, expiry, client, name, role, avatar;
+  int notifID;
   String notifTitle, notifDescription; 
   String blok = "";
   int tagihan, tahun;
   dynamic pemasukan = 0, pengeluaran = 0, total = 0, totalSisa;
   String token = '';
   List _pengumumanList = [];
-  
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    setState(() {
-      accessToken = pref.getString("accessToken");      
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");     
-      name = pref.getString("name");
-      role = pref.getInt("role");
-      avatar = pref.getString("avatar");
-    });
-    getHome();
-  }
 
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
+    String nameStorage = await storage.read(key: "name");
+    String roleStorage = await storage.read(key: "role");
+    String avatarStorage = await storage.read(key: "avatar");    
+    setState(() {
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;
+      name = nameStorage;
+      role = roleStorage;
+      avatar = avatarStorage;
+    });    
+    getHome();    
+  }
+  
   getHome() async {
-    print("masuk ke home yah");
-    try {
+    try {      
       _pengumumanList.clear();
       final response = await http.get(NetworkURL.homePage(), 
       headers: <String, String>{ 
@@ -67,7 +73,7 @@ class _HomeState extends State<Home> {
         'token-type': "Bearer"
       });
     
-      final responJson = json.decode(response.body);
+      final responJson = json.decode(response.body);      
       if(responJson["success"] == true){
         setState(() {
           blok = responJson['blok'];
@@ -83,24 +89,20 @@ class _HomeState extends State<Home> {
         });
       }else{
         //error, user harus login ulang
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.clear();
+        await storage.deleteAll();
         Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Login()), 
         (Route<dynamic> route) => false);  
       }    
     } on SocketException {
       FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
     } catch (e) {
-      print("ERROR.........");
-      print(e);
       FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
     }
-    
   }
   
   Future<void> onRefresh() async {
     _pengumumanList.clear();    
-    getPref();
+    getHome();
   }
   
   void _navigate(Map<String, dynamic> message) {
@@ -128,7 +130,7 @@ class _HomeState extends State<Home> {
       },
     );
     super.initState();
-    getPref(); 
+    getStorage();
     _requestPermissions();  
   }
 
@@ -218,7 +220,7 @@ class _HomeState extends State<Home> {
                       }
                     ),
                     Divider(height: 1, color: Colors.green,),
-                    if(role != 3) ListTile(  
+                    if(role != "3") ListTile(  
                       tileColor: Colors.green[50],
                       title: Text(
                         "Tagihan anda", style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "mon"),

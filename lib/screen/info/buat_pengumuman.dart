@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
+import 'package:puri_ayana_gempol/custom/custom_text_field.dart';
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class BuatPengumumanPage extends StatefulWidget {
@@ -15,6 +16,7 @@ class BuatPengumumanPage extends StatefulWidget {
 }
 
 class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
+  final storage = new FlutterSecureStorage();
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   final titleValidator = RequiredValidator(errorText: 'Judul harus di isi!');
@@ -23,16 +25,19 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
   String accessToken, uid, expiry, client, blockAddress;
   bool isloading = false;
   
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
     setState(() {
-      accessToken = pref.getString("accessToken");      
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");
-    });
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;      
+    });       
   }
-
+  
   final _key = GlobalKey<FormState>();
 
   cek() {
@@ -79,8 +84,8 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
  
   @override
   void initState() {
-    getPref();
     super.initState();
+    getStorage();
   }
 
   @override
@@ -112,8 +117,8 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
                   child: ListView(
                     padding: EdgeInsets.all(10),
                     children: <Widget>[  
-                      SizedBox(height: 20,),                                              
-                      _titleField(),
+                      SizedBox(height: 20,), 
+                      CustomTextField(controller: titleController, hintText: "Judul"),                                             
                       SizedBox(height: 10,),
                       _descriptionField(),
                       SizedBox(height: 10,),
@@ -128,34 +133,7 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
       )
     );
   }
-
-  Widget _titleField() {
-    return TextFormField(  
-      validator: titleValidator,                      
-      controller: titleController,
-      decoration: InputDecoration(
-        contentPadding: EdgeInsets.symmetric(horizontal: 20),
-        filled: true,
-        fillColor: Colors.white,
-          hintText: "Title",
-          hintStyle: TextStyle(fontFamily: "mon"),
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.green),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: new BorderRadius.circular(16.0),
-            borderSide:  BorderSide(color: Colors.green[400] ),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: new BorderRadius.circular(16.0),
-            borderSide: BorderSide(color: Colors.green)
-          ),
-          errorStyle: TextStyle(color: Colors.red),
-        ),
-    );
-  }
-
+  
   Widget _descriptionField() {
     return TextFormField(  
       validator: descriptionValidator,                      
@@ -166,7 +144,7 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
         contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         filled: true,
         fillColor: Colors.white,
-          hintText: "Description",
+          hintText: "DesKripsi",
           hintStyle: TextStyle(fontFamily: "mon"),
           border: OutlineInputBorder(
             borderSide: BorderSide(color: Colors.green),

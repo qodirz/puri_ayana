@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class HutangPage extends StatefulWidget {
@@ -15,22 +15,26 @@ class HutangPage extends StatefulWidget {
 }
 
 class _HutangPageState extends State<HutangPage> {
+  final storage = new FlutterSecureStorage();
   List _listHutang = [];
   bool isLoading = false;
 
   String accessToken, uid, expiry, client; 
   dynamic totalPinjam, totalBayar, sisaHutang;
 
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
     setState(() {
       isLoading = true;
-      accessToken = pref.getString("accessToken");      
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");
-    });
-    getHutang();
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;      
+    });  
+    getHutang();     
   }
 
   getHutang() async {
@@ -47,8 +51,6 @@ class _HutangPageState extends State<HutangPage> {
       });
       
       final responJson = json.decode(response.body);
-      print("getHutang");
-      print(responJson);
       if(responJson["success"] == true){
         final data = responJson["debts"];
         setState(() {
@@ -68,21 +70,19 @@ class _HutangPageState extends State<HutangPage> {
     }on SocketException {
       FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);            
     } catch (e) {
-      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
-      print("ERROR.........");
       print(e);      
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
     }    
   }
  
-  Future<void> onRefresh() async {
-    _listHutang.clear();
-    getPref();
+  Future<void> onRefresh() async {    
+    getHutang();
   }
 
   @override
   void initState() {
-    getPref();
     super.initState();
+    getStorage();
   }
 
   @override

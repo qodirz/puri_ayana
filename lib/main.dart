@@ -1,23 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/screen/login.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:rxdart/subjects.dart';
-
-
-// Future<void> main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   final SharedPreferences prefs = await SharedPreferences.getInstance();
-//   var isLoggedIn = (prefs.getString("accessToken") == null) ? false : true;
-//     runApp(MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       home: isLoggedIn ? Menu() : Login(),
-//     )
-//   );
-// }
-
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -84,8 +71,13 @@ Future<void> main() async {
     }
     selectNotificationSubject.add(payload);
   });
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  var isLoggedIn = (prefs.getString("accessToken") == null) ? false : true;
+  
+  final storage = new FlutterSecureStorage();
+  String accessToken = await storage.read(key: "accessToken");
+  print("MAIN => accessToken");
+  print(accessToken);
+  var isLoggedIn = (accessToken == null) ? false : true;
+
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,

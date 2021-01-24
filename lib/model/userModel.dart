@@ -24,8 +24,6 @@ class UserModel {
   String avatar;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    print("UserModel from model");
-    print(json);
     return UserModel(
       id: json["id"],
       email: json["email"],

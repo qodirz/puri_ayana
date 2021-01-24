@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/cashflow_pertahun.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/cicilan.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/contribution.dart';
@@ -6,7 +7,6 @@ import 'package:puri_ayana_gempol/screen/transaksi/hutang.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/iuran_bulanan.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/tambah_transaksi.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/transaksi_bulanan.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class TransaksiPage extends StatefulWidget {
 	
@@ -15,21 +15,22 @@ class TransaksiPage extends StatefulWidget {
 }
 
 class _TransaksiPageState extends State<TransaksiPage> {
-	int role;
-  bool hasDebt;
+  final storage = new FlutterSecureStorage();
+	String role, hasDebt;
 
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  Future getStorage() async {
+    String roleStorage = await storage.read(key: "role");
+    String hasDebtStorage = await storage.read(key: "hasDebt");
     setState(() {
-      role = pref.getInt("role");
-      hasDebt = pref.getBool("hasDebt");
-    }); 
+      role = roleStorage;  
+      hasDebt = hasDebtStorage;   
+    });       
   }
 
   @override
   void initState() {
     super.initState();
-    getPref();    
+    getStorage();
   }
 	@override
 	Widget build(BuildContext context) {
@@ -51,11 +52,11 @@ class _TransaksiPageState extends State<TransaksiPage> {
                 children: <Widget>[
                   cardList('CASHFLOW PERTAHUN', "cashflow", context),
                   cardList('TRANSAKSI BULANAN', "transaksi_bulanan", context),
-                  if (role != 3) cardList('DATA IURAN', "data_iuran", context),
-                  if (hasDebt == true) cardList('HUTANG SAYA', "hutang", context),
+                  if (role != "3") cardList('DATA IURAN', "data_iuran", context),
+                  if (hasDebt == "true") cardList('HUTANG SAYA', "hutang", context),
                   cardList('CICILAN', "cicilan", context),
-                  if (role == 2 || role == 3) cardList('BAYAR IURAN BULANAN', "iuran_bulanan", context),
-                  if (role == 2 || role == 3) cardList('TAMBAH TRANSAKSI', "tambah_transaksi", context),
+                  if (role == "2" || role == "3") cardList('BAYAR IURAN BULANAN', "iuran_bulanan", context),
+                  if (role == "2" || role == "3") cardList('TAMBAH TRANSAKSI', "tambah_transaksi", context),
                 ],
               ),
             ),
@@ -64,7 +65,6 @@ class _TransaksiPageState extends State<TransaksiPage> {
       ),
 		);
 	}
-
 }
 
 Widget cardList(title, page, context) {

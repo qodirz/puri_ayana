@@ -2,12 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:puri_ayana_gempol/menu.dart';
-import 'package:puri_ayana_gempol/screen/login.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class NewUserPage extends StatefulWidget {
   @override
@@ -15,6 +14,7 @@ class NewUserPage extends StatefulWidget {
 }
 
 class _NewUserPageState extends State<NewUserPage> {
+  final storage = new FlutterSecureStorage();
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
@@ -27,14 +27,21 @@ class _NewUserPageState extends State<NewUserPage> {
   var obSecurePwd = true;
   var obSecurePwdConf = true;
 
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
+    String nameStorage = await storage.read(key: "name");
+    String roleStorage = await storage.read(key: "role");  
     setState(() {
-      accessToken = pref.getString("accessToken");
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");
-    });
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;
+      name = nameStorage;
+      role = roleStorage;
+    });    
   }
 
   cek() {
@@ -69,7 +76,7 @@ class _NewUserPageState extends State<NewUserPage> {
   @override
   void initState() {
     super.initState();
-    getPref();
+    getStorage();
   }
 
   @override

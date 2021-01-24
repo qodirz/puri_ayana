@@ -1,14 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:puri_ayana_gempol/custom/email_field.dart';
 import 'package:puri_ayana_gempol/custom/enter_exit_route.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/screen/login.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
 import 'package:http/http.dart' as http;
 import 'package:puri_ayana_gempol/screen/reset_password.dart';
-import 'package:form_field_validator/form_field_validator.dart';
 
 class ForgotPassword extends StatefulWidget {
   @override
@@ -27,7 +28,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   }
 
   submit() async {
-    showDialog(
+    try{
+      showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -43,34 +45,41 @@ class _ForgotPasswordState extends State<ForgotPassword> {
           );
         });
     
-    final response = await http.post(NetworkURL.resetPasswordToken(), 
-    headers: <String, String>{ 
-      'Content-Type': 'application/json; charset=UTF-8', 
-    },body: jsonEncode(<String, String>{        
-      "email": emailController.text.trim(), 
-    }));
+      final response = await http.post(NetworkURL.resetPasswordToken(), 
+      headers: <String, String>{ 
+        'Content-Type': 'application/json; charset=UTF-8', 
+      },body: jsonEncode(<String, String>{        
+        "email": emailController.text.trim(), 
+      }));
 
-    final responJson = json.decode(response.body);
-    if (responJson != null) {      
-      Navigator.pop(context);
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            content: Text(responJson['message']),
-            actions: <Widget>[
-              FlatButton(
-                onPressed: () => {
-                  responJson['success'] == true ? 
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ResetPassword())) : Navigator.pop(context)
-                },
-                child: Text("Ok"),
-              ),
-            ],
-          );
-        }
-      );
-    }    
+      final responJson = json.decode(response.body);
+      if (responJson != null) {      
+        Navigator.pop(context);
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text(responJson['message']),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: () => {
+                    responJson['success'] == true ? 
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ResetPassword())) : Navigator.pop(context)
+                  },
+                  child: Text("Ok"),
+                ),
+              ],
+            );
+          }
+        );
+      } 
+
+    } on SocketException {
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
+    } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
+    }
+       
   }
 
   @override

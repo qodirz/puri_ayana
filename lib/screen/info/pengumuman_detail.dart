@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class PengumumanItem extends StatefulWidget {  
@@ -20,22 +20,23 @@ class PengumumanItem extends StatefulWidget {
 }
 
 class _PengumumanItemState extends State<PengumumanItem> {
+  final storage = new FlutterSecureStorage();
 
-  String accessToken, uid, expiry, client, tagihan; 
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  String accessToken, uid, expiry, client; 
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
     setState(() {
-      accessToken = pref.getString("accessToken");      
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");
-    });
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;
+    });       
   }
-
+  
   getPengumumanDetail(pengumumanID) async {
-    print("get pengumuman detail");
-    print(pengumumanID);
-    print(accessToken);
     try{
       final response = await http.get(NetworkURL.pengumumanDetail(pengumumanID), 
       headers: <String, String>{ 
@@ -48,27 +49,22 @@ class _PengumumanItemState extends State<PengumumanItem> {
       });
       
       final responJson = json.decode(response.body);
-      print("getPengumumanDetail");
-      print(responJson);
       if(responJson["success"] == true){
-        setState(() {
-          
-        });      
+              
       }else{
       }  
     }on SocketException {
       FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);            
     } catch (e) {
-      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
-      print("ERROR.........");
       print(e);      
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
     }
   }
 
   @override
   void initState() {
-    getPref();
     super.initState();
+    getStorage();
   }
 
   @override

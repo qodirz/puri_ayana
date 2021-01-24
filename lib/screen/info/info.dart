@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:puri_ayana_gempol/screen/info/buat_pengumuman.dart';
 import 'package:puri_ayana_gempol/screen/info/data_warga.dart';
 import 'package:puri_ayana_gempol/screen/info/pengumuman.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class InfoPage extends StatefulWidget {
   
@@ -12,19 +12,20 @@ class InfoPage extends StatefulWidget {
 }
 
 class _InfoPageState extends State<InfoPage> {
-	int role;
+  final storage = new FlutterSecureStorage();
+	String role;
 
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  Future getStorage() async {
+    String roleStorage = await storage.read(key: "role");
     setState(() {
-      role = pref.getInt("role");
-    }); 
+      role = roleStorage;   
+    });       
   }
 
   @override
   void initState() {
-    getPref();
     super.initState();
+    getStorage();
   }
 
 	@override
@@ -49,7 +50,7 @@ class _InfoPageState extends State<InfoPage> {
               children: <Widget>[
                 cardList('PENGUMUMAN', "pengumuman", context),
                 cardList('DATA WARGA', "data_warga", context),
-                if (role == 2 || role == 3) cardList('BUAT PENGUMUMAN', "buat_pengumuman", context),
+                if (role == "2" || role == "3") cardList('BUAT PENGUMUMAN', "buat_pengumuman", context),
               ],
             ),
           ],

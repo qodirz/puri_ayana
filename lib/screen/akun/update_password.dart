@@ -2,13 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:puri_ayana_gempol/custom/password_field.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class UpdatePasswordPage extends StatefulWidget {
   @override
@@ -16,10 +16,11 @@ class UpdatePasswordPage extends StatefulWidget {
 }
 
 class _UpdatePasswordState extends State<UpdatePasswordPage> {
+  final storage = new FlutterSecureStorage();
   TextEditingController currentPasswordController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController passwordConfirmationController = TextEditingController();
-  String accessToken, uid, expiry, client, name, phoneNumber, role, addressId, picBlok;
+  String accessToken, uid, expiry, client;
 
   final currentPasswordValidator = MultiValidator([  
     RequiredValidator(errorText: 'password saat ini harus di isi!'),  
@@ -39,18 +40,17 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
   var obSecurePwd = true;
   var obSecurePwdConf = true;
 
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
     setState(() {
-      accessToken = pref.getString("accessToken");
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");      
-    });
-
-    print("update password page");
-    print(accessToken);
-    print(uid);
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;      
+    });       
   }
 
   cek() {
@@ -117,7 +117,7 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
   @override
   void initState() {
     super.initState();
-    getPref();
+    getStorage();
   }
 
   @override

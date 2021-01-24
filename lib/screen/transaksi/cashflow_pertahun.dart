@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:http/http.dart' as http;
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
@@ -10,7 +11,6 @@ import 'package:puri_ayana_gempol/model/cashflowModel.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CashflowPertahunPage extends StatefulWidget {
   final String from;
@@ -21,6 +21,7 @@ class CashflowPertahunPage extends StatefulWidget {
 }
 
 class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
+  final storage = new FlutterSecureStorage();
   List<CashflowModel> _cashflowList = [];
 
   String accessToken, uid, expiry, client, title, cashflowYear; 
@@ -28,20 +29,23 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
   dynamic totalCashOut = 0;
   dynamic grandTotal = 0;
   bool isLoading = false;
-  
-  getPref() async {
+
+  Future getStorage() async {
     var date = new DateTime.now().toString(); 
     var dateParse = DateTime.parse(date); 
     var year = dateParse.year.toString();
 
-    SharedPreferences pref = await SharedPreferences.getInstance();
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
     setState(() {
-      accessToken = pref.getString("accessToken");      
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");
-      cashflowYear = year;
-    });
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage; 
+      cashflowYear = year;    
+    });       
     getCashFlows(cashflowYear);
   }
 
@@ -78,7 +82,6 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
     } on SocketException {
       FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
     } catch (e) {
-      print("ERROR.........");
       print(e);
       FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
     }  
@@ -87,7 +90,7 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
   @override
   void initState() {
     super.initState();
-    getPref();    
+    getStorage();
   }
 
   @override

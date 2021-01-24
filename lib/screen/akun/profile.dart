@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:line_icons/line_icons.dart';
 import 'package:puri_ayana_gempol/custom/custom_number_field.dart';
 import 'package:puri_ayana_gempol/custom/custom_text_field.dart';
@@ -15,9 +16,7 @@ import 'package:puri_ayana_gempol/custom/customButton.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as path;
 import 'package:async/async.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:form_field_validator/form_field_validator.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -25,12 +24,12 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {  
+  final storage = new FlutterSecureStorage();
   TextEditingController emailController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
   UserModel userModel;
-  String accessToken, uid, expiry, client, email, name, phoneNumber, picBlok, avatar;
-  int role, addressId;
+  String accessToken, uid, expiry, client, email, name, phoneNumber, picBlok, avatar, role, addressId;
  
   final _key = GlobalKey<FormState>();
   var obSecureCurrentPwd = true;
@@ -45,26 +44,30 @@ class _ProfilePageState extends State<ProfilePage> {
     });    
   }
 
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
+    String nameStorage = await storage.read(key: "name");
+    String emailStorage = await storage.read(key: "email");
+    String phoneNumberStorage = await storage.read(key: "phoneNumber");
+    String roleStorage = await storage.read(key: "role");
+    String avatarStorage = await storage.read(key: "avatar");    
     setState(() {
-      accessToken = pref.getString("accessToken");
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");      
-
-      email = pref.getString("email");
-      name = pref.getString("name");
-      phoneNumber = pref.getString("phoneNumber");
-      role = pref.getInt("role");
-      addressId = pref.getInt("addressId");
-      picBlok = pref.getString("picBlok");
-      avatar = pref.getString("avatar");
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;
+      name = nameStorage;
+      email = emailStorage;
+      role = roleStorage;
+      avatar = avatarStorage;
 
       emailController.text = email;
       nameController.text = name;
-      phoneNumberController.text = phoneNumber;      
-    });
+      phoneNumberController.text = phoneNumberStorage;      
+    });       
   }
 
   cek() {
@@ -115,17 +118,10 @@ class _ProfilePageState extends State<ProfilePage> {
       var response = await request.send();
       response.stream.transform(utf8.decoder).listen((a) {
         final data = jsonDecode(a);
+        
         if (data['success'] == true) {
           userModel = UserModel.fromJson(data["me"]); 
-          savePref(
-            userModel.email,
-            userModel.name,
-            userModel.phoneNumber,
-            userModel.role,
-            userModel.addressId,
-            userModel.picBlok,
-            data["avatar"]
-          );
+          updateProfileStorage(userModel, data["avatar"]);
           setState(() {                         
             _image = null; 
             avatar = data["avatar"];
@@ -133,7 +129,6 @@ class _ProfilePageState extends State<ProfilePage> {
             nameController.text = userModel.name;
             phoneNumberController.text = userModel.phoneNumber; 
           });
-
           FlushbarHelper.createSuccess(title: 'Berhasil',message: data['message'],).show(context);                     
         } else {
           FlushbarHelper.createError(title: 'Error',message: data['message'],).show(context);                                
@@ -143,25 +138,23 @@ class _ProfilePageState extends State<ProfilePage> {
       Navigator.pop(context);    
   }
 
-  savePref(
-    String email, name, phoneNumber, role, addressId, picBlok, avatar
-  ) async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    setState(() {      
-      pref.setString("email", email);
-      pref.setString("name", name);
-      pref.setString("phoneNumber", phoneNumber);
-      pref.setInt("role", role);
-      pref.setInt("addressId", addressId);
-      pref.setString("picBlok", picBlok);
-      pref.setString("avatar", avatar);
-    });
+  Future updateProfileStorage(userModel, avatar) async {
+    await storage.write(key: "email", value: userModel.email);
+    await storage.write(key: "name", value: userModel.name);
+    await storage.write(key: "phoneNumber", value: userModel.phoneNumber);
+    await storage.write(key: "role", value: userModel.role.toString());
+    await storage.write(key: "addressId", value: userModel.addressId.toString());
+    await storage.write(key: "picBlok", value: userModel.picBlok);
+    await storage.write(key: "avatar", value: avatar); 
+
+    String nameStorage = await storage.read(key: "name");
+    print(nameStorage);   
   }
 
   @override
   void initState() {
     super.initState();
-    getPref();
+    getStorage();
   }
 
   @override

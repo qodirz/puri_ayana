@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/cicilan.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class CicilanDetailPage extends StatefulWidget {  
@@ -19,22 +19,24 @@ class CicilanDetailPage extends StatefulWidget {
 }
 
 class _CicilanDetailPageState extends State<CicilanDetailPage> {
-  
+  final storage = new FlutterSecureStorage();
   String accessToken, uid, expiry, client, description; 
   dynamic totalPaid, remainingInstallment;
   List _listInstallmentTransactions = [];  
   bool isLoading = false;
   
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
     setState(() {
-      isLoading = true;
-      accessToken = pref.getString("accessToken");      
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");
-    });
-    getCicilanDetail();
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;
+    });    
+    getCicilanDetail();   
   }
 
   getCicilanDetail() async {
@@ -72,11 +74,9 @@ class _CicilanDetailPageState extends State<CicilanDetailPage> {
     } on SocketException {
       FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
     } catch (e) {
-      print("ERROR.........");
       print(e);
       FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
     }
-    
   }
  
   Future<void> onRefresh() async {
@@ -84,13 +84,13 @@ class _CicilanDetailPageState extends State<CicilanDetailPage> {
     setState(() {
       isLoading = true;
     });
-    getPref();
+    getCicilanDetail();
   }
 
   @override
-  void initState() {
-    getPref();
+  void initState() {    
     super.initState();
+    getStorage();
   }
 
   @override

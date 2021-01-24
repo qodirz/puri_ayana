@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/screen/akun/new_user.dart';
 import 'package:puri_ayana_gempol/screen/akun/profile.dart';
 import 'package:puri_ayana_gempol/screen/akun/update_password.dart';
 import 'package:puri_ayana_gempol/screen/login.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class AkunPage extends StatefulWidget {
@@ -15,25 +15,25 @@ class AkunPage extends StatefulWidget {
 }
 
 class _AkunPageState extends State<AkunPage> {
-	TextEditingController emailController = TextEditingController();
-  String accessToken, uid, expiry, client, name, phoneNumber, picBlok;
-  int role;
-  
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    setState(() {
-      accessToken = pref.getString("accessToken");
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");
+  final storage = new FlutterSecureStorage();
+  TextEditingController emailController = TextEditingController();
+  String accessToken, uid, expiry, client, role;
 
-      name = pref.getString("name");
-      phoneNumber = pref.getString("phoneNumber");
-      role = pref.getInt("role");
-      picBlok = pref.getString("picBlok");
-    }); 
+  getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
+    String roleStorage = await storage.read(key: "role");
+    setState(() {
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;
+      role = roleStorage;
+    });
   }
-	
+  
   _logOut(){
     showDialog(
       context: context,
@@ -87,8 +87,7 @@ class _AkunPageState extends State<AkunPage> {
     final data = jsonDecode(response.body);
     
     if (data['success'] == true) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.clear();    
+      await storage.deleteAll();
       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Login()), 
       (Route<dynamic> route) => false);      
     } else {
@@ -113,7 +112,7 @@ class _AkunPageState extends State<AkunPage> {
   @override
   void initState() {
     super.initState();
-    getPref();    
+    getStorage();
   }
 	@override
 	Widget build(BuildContext context) {
@@ -135,7 +134,7 @@ class _AkunPageState extends State<AkunPage> {
                 children: <Widget>[
                   cardList('PROFIL', "profile", context),
                   cardList('UBAH PASSWORD', "update_password", context),
-                  if ( false == true && role == 2 && role == 3) cardList('BUAT USER BARU', "new_user", context),
+                  if ( false == true && role == "2" && role == "3") cardList('BUAT USER BARU', "new_user", context),
                   ListTile(  
                     tileColor: Colors.redAccent,
                     title: Text(

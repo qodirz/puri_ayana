@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class IuranBulananPage extends StatefulWidget {
@@ -16,6 +16,7 @@ class IuranBulananPage extends StatefulWidget {
 }
 
 class _IuranBulananPageState extends State<IuranBulananPage> {
+  final storage = new FlutterSecureStorage();
   String dropdownValue = '1';
   String paymentOption = 'Cash';  
   final searchValidator = RequiredValidator(errorText: 'blok is required');  
@@ -30,14 +31,17 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
   int tagihan, addressID;
   double kontribusi = 0;
 
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
     setState(() {
-      accessToken = pref.getString("accessToken");      
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");
-    });
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;     
+    });       
   }
 
   final _key = GlobalKey<FormState>();
@@ -119,8 +123,8 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
  
   @override
   void initState() {
-    getPref();
     super.initState();
+    getStorage();
   }
 
   @override

@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:puri_ayana_gempol/custom/custom_number_field.dart';
 import 'package:puri_ayana_gempol/custom/email_field.dart';
 import 'package:puri_ayana_gempol/custom/enter_exit_route.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/custom/password_field.dart';
 import 'package:puri_ayana_gempol/screen/login.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
@@ -17,8 +18,7 @@ class ResetPassword extends StatefulWidget {
   _ResetPasswordState createState() => _ResetPasswordState();
 }
 
-class _ResetPasswordState extends State<ResetPassword> {
-  
+class _ResetPasswordState extends State<ResetPassword> {  
   TextEditingController emailController = TextEditingController();
   TextEditingController tokenController = TextEditingController();
   TextEditingController newPasswordController = TextEditingController();
@@ -35,7 +35,8 @@ class _ResetPasswordState extends State<ResetPassword> {
   }
 
   submit() async {
-    showDialog(
+    try{
+      showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -51,38 +52,43 @@ class _ResetPasswordState extends State<ResetPassword> {
           );
         });
     
-    final response = await http.post(NetworkURL.resetPassword(), 
-    headers: <String, String>{ 
-      'Content-Type': 'application/json; charset=UTF-8', 
-    },body: jsonEncode(<String, String>{        
-      "email": emailController.text.trim(), 
-      "token": tokenController.text.trim(), 
-      "new_password": newPasswordController.text.trim(), 
-      "new_password_confirmation": newPasswordConfirmationController.text.trim(), 
-    }));
+      final response = await http.post(NetworkURL.resetPassword(), 
+      headers: <String, String>{ 
+        'Content-Type': 'application/json; charset=UTF-8', 
+      },body: jsonEncode(<String, String>{        
+        "email": emailController.text.trim(), 
+        "token": tokenController.text.trim(), 
+        "new_password": newPasswordController.text.trim(), 
+        "new_password_confirmation": newPasswordConfirmationController.text.trim(), 
+      }));
 
-    final responJson = json.decode(response.body);
-    if (responJson != null) {
-      Navigator.pop(context);
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            content: Text(responJson['message']),
-            actions: <Widget>[
-              FlatButton(
-                onPressed: () => {
-                  responJson['success'] == true ? 
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()))
-                  : Navigator.pop(context)                  
-                },
-                child: Text("Ok"),
-              ),
-            ],
-          );
-        }
-      );
-    }    
+      final responJson = json.decode(response.body);
+      if (responJson != null) {
+        Navigator.pop(context);
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text(responJson['message']),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: () => {
+                    responJson['success'] == true ? 
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login()))
+                    : Navigator.pop(context)                  
+                  },
+                  child: Text("Ok"),
+                ),
+              ],
+            );
+          }
+        );
+      } 
+    } on SocketException {
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
+    } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
+    }   
   }
 
   @override

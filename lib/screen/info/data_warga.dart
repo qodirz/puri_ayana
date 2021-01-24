@@ -1,22 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class DataWargaPage extends StatefulWidget {
   DataWargaPage({ Key key }) : super(key: key);
   @override
   _DataWargaPageState createState() => new _DataWargaPageState();
-
 }
 
-class _DataWargaPageState extends State<DataWargaPage>
-{
-  Widget appBarTitle = new Text("DATA WARGAx", style: new TextStyle(color: Colors.white),);
+class _DataWargaPageState extends State<DataWargaPage>{
+  final storage = new FlutterSecureStorage();
+  Widget appBarTitle = new Text("DATA WARGA", style: new TextStyle(color: Colors.white),);
   Icon actionIcon = new Icon(Icons.search, color: Colors.white,);
   final key = new GlobalKey<ScaffoldState>();
   final TextEditingController _searchQuery = new TextEditingController();
@@ -26,18 +25,20 @@ class _DataWargaPageState extends State<DataWargaPage>
   String _searchText = "";
   bool isLoading = false;
 
-  String accessToken, uid, expiry, client, tagihan; 
-  double contribution;
-  getPref() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
+  String accessToken, uid, expiry, client; 
+  
+  Future getStorage() async {
+    String tokenStorage = await storage.read(key: "accessToken");     
+    String uidStorage = await storage.read(key: "uid");
+    String expiryStorage = await storage.read(key: "expiry");
+    String clientStorage = await storage.read(key: "client");
     setState(() {
-      isLoading = true;
-      accessToken = pref.getString("accessToken");      
-      uid = pref.getString("uid");
-      expiry = pref.getString("expiry");
-      client = pref.getString("client");
-    });
-    getUsers();
+      accessToken = tokenStorage;
+      uid = uidStorage;
+      expiry = expiryStorage;
+      client = clientStorage;      
+    });   
+    getUsers();    
   }
 
   _DataWargaPageState() {
@@ -93,9 +94,8 @@ class _DataWargaPageState extends State<DataWargaPage>
     }on SocketException {
       FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
     } catch (e) {
-      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
-      print("ERROR.........");
       print(e);      
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
     }    
   }
 
@@ -103,7 +103,7 @@ class _DataWargaPageState extends State<DataWargaPage>
   void initState() {
     super.initState();
     _isSearching = false;
-    getPref();
+    getStorage();
   }
 
   @override
