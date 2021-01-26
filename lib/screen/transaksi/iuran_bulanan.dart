@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -23,13 +26,14 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
  
   TextEditingController searchController = TextEditingController();
   
-  String accessToken, uid, expiry, client, blockAddress;
+  String accessToken, uid, expiry, client, blockAddress, lastPayDate;
   String message = "";
   bool loading = false;
   bool isPresent = false;
   bool submitted = false;
   int tagihan, addressID;
   double kontribusi = 0;
+  dynamic lastPayAmount = 0;
 
   Future getStorage() async {
     String tokenStorage = await storage.read(key: "accessToken");     
@@ -56,69 +60,88 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
   }
 
   getBlokInfo() async {
-    final response = await http.get(NetworkURL.blockDetail(searchController.text), 
-    headers: <String, String>{ 
-      'Content-Type': 'application/json; charset=UTF-8', 
-      'access-token': accessToken,
-      'expiry': expiry,
-      'uid': uid,
-      'client': client,
-      'token-type': "Bearer"
-    });
-    
-    final responJson = json.decode(response.body);
-    if(responJson["success"] == true){      
-      setState(() {
-        isPresent = true;
-        loading = false;      
-        message = "";
-        blockAddress = responJson["address"]["block_address"];
-        kontribusi = double.parse(responJson["address"]["contribution"]);
-        tagihan = responJson["tagihan"];
-        addressID = responJson["address"]["id"];
-      });      
-    }else{
-      setState(() {
-        isPresent = false;
-        loading = false;  
-        message = responJson["message"];       
-      }); 
-    }  
+    try{      
+      FocusScope.of(context).requestFocus(new FocusNode());    
+      final response = await http.get(NetworkURL.blockDetail(searchController.text), 
+      headers: <String, String>{ 
+        'Content-Type': 'application/json; charset=UTF-8', 
+        'access-token': accessToken,
+        'expiry': expiry,
+        'uid': uid,
+        'client': client,
+        'token-type': "Bearer"
+      });
+      
+      final responJson = json.decode(response.body);
+      if(responJson["success"] == true){      
+        setState(() {
+          isPresent = true;
+          loading = false;      
+          message = "";
+          blockAddress = responJson["address"]["block_address"];
+          kontribusi = double.parse(responJson["address"]["contribution"]);
+          tagihan = responJson["tagihan"];
+          addressID = responJson["address"]["id"];
+          if(responJson["last_contribution"] != null){
+            lastPayDate = responJson["last_contribution"]["pay_at"]; 
+            lastPayAmount = responJson["last_contribution"]["contribution"];
+          }
+        });      
+      }else{
+        setState(() {
+          isPresent = false;
+          loading = false;  
+          message = responJson["message"];       
+        }); 
+      }  
+    } on SocketException {
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
+    } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
+    }
   }
 
   payContribution() async {
-    final response = await http.post(NetworkURL.payContribution(), 
-    headers: <String, String>{ 
-      'Content-Type': 'application/json; charset=UTF-8', 
-      'access-token': accessToken,
-      'expiry': expiry,
-      'uid': uid,
-      'client': client,
-      'token-type': "Bearer"
-    },body: jsonEncode(<String, dynamic>{        
-      "address_id": addressID,
-      "contribution": kontribusi, 
-      "total_bayar": int.parse(dropdownValue),
-      "pay_at": DateTime.now().toString(),
-      "payment_type": paymentOption == "Cash" ? 1 : 2, 
-      "blok": blockAddress.replaceAll(RegExp('[0-9]'), '')
-    }));
+    try{
+      FocusScope.of(context).requestFocus(new FocusNode());          
+      final response = await http.post(NetworkURL.payContribution(), 
+      headers: <String, String>{ 
+        'Content-Type': 'application/json; charset=UTF-8', 
+        'access-token': accessToken,
+        'expiry': expiry,
+        'uid': uid,
+        'client': client,
+        'token-type': "Bearer"
+      },body: jsonEncode(<String, dynamic>{        
+        "address_id": addressID,
+        "contribution": kontribusi, 
+        "total_bayar": int.parse(dropdownValue),
+        "pay_at": DateTime.now().toString(),
+        "payment_type": paymentOption == "Cash" ? 1 : 2, 
+        "blok": blockAddress.replaceAll(RegExp('[0-9]'), '')
+      }));
+      
+      final responJson = json.decode(response.body);
+      if(responJson["success"] == true){      
+        setState(() {
+          isPresent = false;
+          submitted = false;
+          message = responJson["message"];       
+        });      
+      }else{
+        setState(() {
+          isPresent = false;
+          submitted = false;
+          loading = false;  
+          message = responJson["message"];       
+        }); 
+      }
+    } on SocketException {
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
+    } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
+    }
     
-    final responJson = json.decode(response.body);
-    if(responJson["success"] == true){      
-      setState(() {
-        isPresent = false;
-        submitted = false;
-        message = responJson["message"];       
-      });      
-    }else{
-      setState(() {
-        isPresent = false;
-        submitted = false;
-        loading = false;  
-        message = responJson["message"];       
-      }); 
-    }  
   }
  
   @override
@@ -162,7 +185,7 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
               ),
             ],
           ),
-        )        
+        )
       )
     );
   }
@@ -202,7 +225,7 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
                   contentPadding: EdgeInsets.symmetric(horizontal: 20),
                   filled: true,
                   fillColor: Colors.white,
-                  hintText: "Search blok",
+                  hintText: "Cari blok",
                   hintStyle: TextStyle(fontFamily: "mon"),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.green),
@@ -239,36 +262,26 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
   Widget _dataUser() {            
     return Column(        
       children: <Widget>[
-        _blokInfo(),
-        _tagihanInfo(),
-        _kontribusiInfo(),
+        if(lastPayDate != null) iuranTitle("Pembayaran Terakhir"),
+        if(lastPayDate != null) iuranInfo("Tanggal", lastPayDate),
+        if(lastPayDate != null) iuranInfo("Jumlah", NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(lastPayAmount)),
+        SizedBox(height: 20,),
+        iuranTitle("Iuran Info"),
+        iuranInfo("Blok", blockAddress),
+        iuranInfo("Tagihan", "$tagihan kali"),
+        iuranInfo("Kontribusi", NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(kontribusi)),
         SizedBox(height: 10,),
       ],
     );
   }
 
-  Widget _blokInfo() {
-    return Container(
-      width: double.infinity, 
-      height: 40,
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.green[100], width: 2))            
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Container(
-            child: Text("Blok", style: TextStyle(fontSize: 16, fontFamily: "mon")),
-          ),
-          Container(
-            child: Text(blockAddress, style: TextStyle(fontSize: 18, fontFamily: "mon"),),
-          ),
-        ],
-      ) 
+  Widget iuranTitle(title) {
+    return Center(
+      child: Text(title, style: TextStyle(fontSize: 18, fontFamily: "mon", fontWeight: FontWeight.bold)),
     );
   }
 
-  Widget _tagihanInfo() {
+  Widget iuranInfo(title, value) {
     return Container(
       width: double.infinity, 
       height: 40,
@@ -279,31 +292,10 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            child: Text("Tagihan", style: TextStyle(fontSize: 16, fontFamily: "mon")),
+            child: Text(title, style: TextStyle(fontSize: 16, fontFamily: "mon")),
           ),
           Container(
-            child: Text("$tagihan kali", style: TextStyle(fontSize: 18, fontFamily: "mon"),),
-          ),
-        ],
-      ) 
-    );
-  }
-
-  Widget _kontribusiInfo() {
-    return Container(
-      width: double.infinity, 
-      height: 40,
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.green[100], width: 2))            
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Container(
-            child: Text("Kontribusi", style: TextStyle(fontSize: 16, fontFamily: "mon")),
-          ),
-          Container(
-            child: Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(kontribusi), style: TextStyle(fontSize: 18, fontFamily: "mon"),),
+            child: Text(value, style: TextStyle(fontSize: 18, fontFamily: "mon"),),
           ),
         ],
       ) 
