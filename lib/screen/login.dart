@@ -49,6 +49,7 @@ class _LoginState extends State<Login> {
 
   submit() async {
     try{
+      FocusScope.of(context).requestFocus(new FocusNode());    
       showDialog(
       context: context,
       builder: (context) {
@@ -84,8 +85,6 @@ class _LoginState extends State<Login> {
       }));
       
       final responJson = json.decode(response.body);
-      print("LOGIN");
-      print(responJson);
       if (response.headers['access-token'] != null) {      
         loginModel = LoginModel.api(response.headers);
         userModel = UserModel.fromJson(responJson["me"]);
