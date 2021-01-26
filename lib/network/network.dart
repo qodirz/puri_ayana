@@ -86,7 +86,7 @@ class NetworkURL {
   }
   
   static String newUser(){
-    return "$server/api/v1/users/new";
+    return "$server/api/v1/users/create";
   }
 
   static String cashTransactions(String month, String year){

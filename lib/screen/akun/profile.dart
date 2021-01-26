@@ -77,23 +77,25 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   submit() async {
-    FocusScope.of(context).requestFocus(new FocusNode());    
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Processing.."),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              CircularProgressIndicator(),
-              SizedBox(height: 16,),
-              Text("Please wait...")
-            ],
-          ),
-        );
-      });
-    
+    try{
+      FocusScope.of(context).requestFocus(new FocusNode());    
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("Processing.."),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                CircularProgressIndicator(),
+                SizedBox(height: 16,),
+                Text("Please wait...")
+              ],
+            ),
+          );
+        }
+      );
+      
       Map<String, String> headers = { 
         'Content-Type': 'application/json; charset=UTF-8', 
         'access-token': accessToken,
@@ -136,6 +138,12 @@ class _ProfilePageState extends State<ProfilePage> {
         
       });
       Navigator.pop(context);    
+
+    } on SocketException {
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
+    } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
+    }
   }
 
   Future updateProfileStorage(userModel, avatar) async {

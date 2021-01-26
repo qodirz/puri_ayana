@@ -1,8 +1,13 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:puri_ayana_gempol/custom/custom_number_field.dart';
+import 'package:puri_ayana_gempol/custom/custom_text_field.dart';
+import 'package:puri_ayana_gempol/custom/email_field.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/custom/customButton.dart';
@@ -19,7 +24,7 @@ class _NewUserPageState extends State<NewUserPage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneNumberController = TextEditingController();
   
-  String accessToken, uid, expiry, client, name, phoneNumber, role;
+  String accessToken, uid, expiry, client;
   bool isloading = false;
   
   final _key = GlobalKey<FormState>();
@@ -32,15 +37,11 @@ class _NewUserPageState extends State<NewUserPage> {
     String uidStorage = await storage.read(key: "uid");
     String expiryStorage = await storage.read(key: "expiry");
     String clientStorage = await storage.read(key: "client");
-    String nameStorage = await storage.read(key: "name");
-    String roleStorage = await storage.read(key: "role");  
     setState(() {
       accessToken = tokenStorage;
       uid = uidStorage;
       expiry = expiryStorage;
       client = clientStorage;
-      name = nameStorage;
-      role = roleStorage;
     });    
   }
 
@@ -51,26 +52,62 @@ class _NewUserPageState extends State<NewUserPage> {
     }
   }
 
-  submit() async {    
-    final response = await http.post(NetworkURL.newUser(), 
-    headers: <String, String>{ 
-      'Content-Type': 'application/json; charset=UTF-8', 
-      'access-token': accessToken,
-      'expiry': expiry,
-      'uid': uid,
-      'client': client,
-      'token-type': "Bearer"
-    },body: jsonEncode(<String, String>{ 
-      "email": emailController.text.trim(),        
-      "name": nameController.text.trim(), 
-      "phoneNumber": phoneNumberController.text.trim(),       
-    }));
+  submit() async {   
+    try{
+      FocusScope.of(context).requestFocus(new FocusNode());    
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("Processing.."),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                CircularProgressIndicator(),
+                SizedBox(height: 16,),
+                Text("Please wait...")
+              ],
+            ),
+          );
+        }
+      );
 
-    final responJson = json.decode(response.body);
-    if (responJson != null) {
+      final response = await http.post(NetworkURL.newUser(), 
+      headers: <String, String>{ 
+        'Content-Type': 'application/json; charset=UTF-8', 
+        'access-token': accessToken,
+        'expiry': expiry,
+        'uid': uid,
+        'client': client,
+        'token-type': "Bearer"
+      },body: jsonEncode(<String, dynamic>{        
+        'user': <String, dynamic>{
+          'email': emailController.text.trim(), 
+          'name': nameController.text.trim(),
+          'phone_number': phoneNumberController.text.trim()
+        }
+      }));
+
+      final responJson = json.decode(response.body);
       Navigator.pop(context);
-      
-    }    
+      if (responJson['success'] == true) {
+        setState(() {                         
+          emailController.text = "";
+          nameController.text = "";
+          phoneNumberController.text = ""; 
+        });
+         FlushbarHelper.createSuccess(title: 'Berhasil',message: responJson['message'],).show(context);        
+      }else{
+         FlushbarHelper.createError(title: 'Error',message: responJson['message'],).show(context); 
+      }
+      setState(() {
+        isloading = false;
+      });
+    } on SocketException {
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
+    } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
+    }
   }
 
   @override
@@ -109,81 +146,12 @@ class _NewUserPageState extends State<NewUserPage> {
                   child: ListView(
                     padding: EdgeInsets.all(10),
                     children: <Widget>[
-                      TextFormField(                        
-                        controller: emailController,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Email",
-                          hintStyle: TextStyle(fontFamily: "mon"),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide:  BorderSide(color: Colors.green[400] ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide: BorderSide(color: Colors.green)
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      TextFormField(                        
-                        controller: nameController,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Nama",
-                          hintStyle: TextStyle(fontFamily: "mon"),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide:  BorderSide(color: Colors.green[400] ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide: BorderSide(color: Colors.green)
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      TextFormField(                        
-                        controller: phoneNumberController,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                          filled: true,
-                          fillColor: Colors.white,
-                          hintText: "Telpon",
-                          hintStyle: TextStyle(fontFamily: "mon"),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.green),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide:  BorderSide(color: Colors.green[400] ),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(16.0),
-                            borderSide: BorderSide(color: Colors.green)
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
+                      EmailField(controller: emailController, hintText: "Email",),                      
+                      SizedBox(height: 16,),
+                      CustomTextField(controller: nameController, hintText: "Nama"),
+                      SizedBox(height: 16,),
+                      CustomNumberField(controller: phoneNumberController, hintText: "Telpon"),
+                      SizedBox(height: 16,),                     
                       _btnSimpan(),
                     ],
                   ),

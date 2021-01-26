@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/custom/password_field.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
@@ -60,7 +62,9 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
   }
 
   submit() async {
-    showDialog(
+    try{
+      FocusScope.of(context).requestFocus(new FocusNode());   
+      showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
@@ -74,44 +78,52 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
               ],
             ),
           );
-        });
-    
-    final response = await http.put(NetworkURL.updatePassword(), 
-    headers: <String, String>{ 
-      'Content-Type': 'application/json; charset=UTF-8', 
-      'access-token': accessToken,
-      'expiry': expiry,
-      'uid': uid,
-      'client': client,
-      'token-type': "Bearer"
-    },body: jsonEncode(<String, String>{        
-      "current_password": currentPasswordController.text.trim(), 
-      "password": passwordController.text.trim(), 
-      "password_confirmation": passwordConfirmationController.text.trim(), 
-    }));
-
-    final responJson = json.decode(response.body);
-    if (responJson != null) {
-      Navigator.pop(context);
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            content: Text(responJson['success'] == true ? "successfully updated password." : "failed update password!"),
-            actions: <Widget>[
-              FlatButton(
-                onPressed: () => {
-                  responJson['success'] == true ? 
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)))
-                  : Navigator.pop(context)                  
-                },
-                child: Text("Ok"),
-              ),
-            ],
-          );
         }
       );
-    }    
+      
+      final response = await http.put(NetworkURL.updatePassword(), 
+      headers: <String, String>{ 
+        'Content-Type': 'application/json; charset=UTF-8', 
+        'access-token': accessToken,
+        'expiry': expiry,
+        'uid': uid,
+        'client': client,
+        'token-type': "Bearer"
+      },body: jsonEncode(<String, String>{        
+        "current_password": currentPasswordController.text.trim(), 
+        "password": passwordController.text.trim(), 
+        "password_confirmation": passwordConfirmationController.text.trim(), 
+      }));
+
+      final responJson = json.decode(response.body);
+      if (responJson != null) {
+        Navigator.pop(context);
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text(responJson['success'] == true ? "successfully updated password." : "failed update password!"),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: () => {
+                    responJson['success'] == true ? 
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)))
+                    : Navigator.pop(context)                  
+                  },
+                  child: Text("Ok"),
+                ),
+              ],
+            );
+          }
+        );
+      }  
+
+    } on SocketException {
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
+    } catch (e) {
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
+    }
+      
   }
 
   @override
