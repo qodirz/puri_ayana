@@ -38,7 +38,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   File _image;
   pilihGallery() async {
-    final image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    final image = await ImagePicker.pickImage(source: ImageSource.gallery);    
     setState(() {
       _image = image;
     });    

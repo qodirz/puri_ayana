@@ -1,4 +1,3 @@
-
 class CashflowModel {
   CashflowModel({
       this.id,

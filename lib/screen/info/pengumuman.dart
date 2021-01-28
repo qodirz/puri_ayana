@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/intl.dart';
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:http/http.dart' as http;
@@ -52,14 +53,18 @@ class _PengumumanPageState extends State<PengumumanPage> {
       });
       
       final responJson = json.decode(response.body);
-      print("getPengumuman");
-      print(responJson);
       if(responJson["success"] == true){
         final data = responJson["user_notifications"];
         setState(() {
           isLoading = false;
           for (Map i in data) {
-            _pengumumanList.add( [i["notification"]["id"], i["notification"]["title"], i["notification"]["notif"], i["is_read"]] );            
+            _pengumumanList.add( 
+              [i["notification"]["id"], 
+              i["notification"]["title"], 
+              i["notification"]["notif"], 
+              i["is_read"], 
+              i["notif_sent_at"]
+            ] );            
           }          
         });      
       }else{
@@ -70,9 +75,8 @@ class _PengumumanPageState extends State<PengumumanPage> {
     }on SocketException {
       FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
     } catch (e) {
-      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
-      print("ERROR.........");
       print(e);      
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
     }    
   }
   
@@ -133,13 +137,12 @@ class _PengumumanPageState extends State<PengumumanPage> {
                     itemBuilder: (BuildContext context, int index){
                       return Column(
                         children: <Widget>[                          
-                          PengumumanItem(_pengumumanList[index][0], _pengumumanList[index][1], _pengumumanList[index][2], _pengumumanList[index][3]),
+                          PengumumanItem(_pengumumanList[index][0], _pengumumanList[index][1], _pengumumanList[index][2], _pengumumanList[index][3], _pengumumanList[index][4]),
                           Divider(height: 1, color: Colors.green,), 
                         ],
                       );
                     },
                   ),
-                  
               ],
             ),
           ),

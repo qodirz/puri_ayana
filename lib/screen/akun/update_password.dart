@@ -164,7 +164,7 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
                       SizedBox(height: 20,),   
                       PasswordField(controller: currentPasswordController, hintText: "Password saat ini",),                                                              
                       SizedBox(height: 16,),
-                      PasswordField(controller: currentPasswordController, hintText: "Password",),                       
+                      PasswordField(controller: passwordController, hintText: "Password",),                       
                       SizedBox(height: 16,),
                       TextFormField(
                         validator: (val) => MatchValidator(errorText: 'passwords tidak sama').validateMatch(val, passwordConfirmationController.text),       

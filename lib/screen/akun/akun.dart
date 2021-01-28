@@ -17,7 +17,7 @@ class AkunPage extends StatefulWidget {
 class _AkunPageState extends State<AkunPage> {
   final storage = new FlutterSecureStorage();
   TextEditingController emailController = TextEditingController();
-  String accessToken, uid, expiry, client, role;
+  String accessToken, uid, expiry, client, role, headFamily;
 
   getStorage() async {
     String tokenStorage = await storage.read(key: "accessToken");     
@@ -25,16 +25,15 @@ class _AkunPageState extends State<AkunPage> {
     String expiryStorage = await storage.read(key: "expiry");
     String clientStorage = await storage.read(key: "client");
     String roleStorage = await storage.read(key: "role");
+    String headFamilyStorage = await storage.read(key: "headFamily");
     setState(() {
       accessToken = tokenStorage;
       uid = uidStorage;
       expiry = expiryStorage;
       client = clientStorage;
       role = roleStorage;
+      headFamily = headFamilyStorage;
     });
-
-    print("ROLEEE");
-    print(role);
   }
   
   _logOut(){
@@ -137,7 +136,7 @@ class _AkunPageState extends State<AkunPage> {
                 children: <Widget>[
                   cardList('PROFIL', "profile", context),
                   cardList('UBAH PASSWORD', "update_password", context),
-                  if (role == "2" || role == "3") cardList('BUAT USER BARU', "new_user", context),
+                  if ((role == "1" && headFamily == "true") || role == "2" ) cardList('BUAT USER BARU', "new_user", context),
                   ListTile(  
                     tileColor: Colors.redAccent,
                     title: Text(

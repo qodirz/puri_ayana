@@ -100,10 +100,13 @@ class _LoginState extends State<Login> {
         await storage.write(key: "picBlok", value: userModel.picBlok);
         await storage.write(key: "avatar", value: responJson["avatar"]);
         await storage.write(key: "hasDebt", value: responJson["has_debt"].toString());
+        await storage.write(key: "headFamily", value: userModel.kk.toString());
         FocusScope.of(context).requestFocus(new FocusNode());
         Navigator.pop(context);
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Menu()));
-      } 
+      }else{
+        Navigator.pop(context);
+      }
       showDialog(
         context: context,
         builder: (context) {

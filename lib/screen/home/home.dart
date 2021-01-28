@@ -9,7 +9,6 @@ import 'package:puri_ayana_gempol/custom/local_notification.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/screen/home/blok_detail.dart';
 import 'package:puri_ayana_gempol/screen/info/pengumuman.dart';
-import 'package:puri_ayana_gempol/screen/info/pengumuman_detail.dart';
 import 'package:puri_ayana_gempol/screen/login.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/cashflow_pertahun.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/contribution.dart';
@@ -84,7 +83,7 @@ class _HomeState extends State<Home> {
           total = pemasukan - pengeluaran;
           totalSisa = responJson['total_sisa_kas'];
           for (Map i in responJson["notifications"]) {
-            _pengumumanList.add( [i["notification"]["id"], i["notification"]["title"], i["notification"]["notif"], i["is_read"]] );            
+            _pengumumanList.add( [i["notification"]["id"], i["notification"]["title"], i["notification"]["notif"], i["is_read"], i["notification"]["created_at"]] );
           }
         });
       }else{
@@ -271,37 +270,37 @@ class _HomeState extends State<Home> {
                           fontFamily: "mon", 
                           color: (total < 0) ? Colors.red : Colors.blue 
                         ), 
-                      ),   
+                      ), 
                     ),
                     Divider(height: 1, color: Colors.green,),                
-                    Container(
-                      color: Colors.green[50],
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 16,),
-                          Text( "Pengumuman", style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, fontFamily: "mon" )),                        
-                          SizedBox(height: 10),
-                          Divider(height: 1, color: Colors.green,),                        
-                          SizedBox(
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              physics: BouncingScrollPhysics(),
-                              itemCount: _pengumumanList.length,
-                              itemBuilder: (BuildContext context, int index){
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    PengumumanItem(_pengumumanList[index][0], _pengumumanList[index][1], _pengumumanList[index][2], _pengumumanList[index][3]),
-                                    Divider(height: 1, color: Colors.green,),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ],                        
-                      ),
-                    ),
+                    // Container(
+                    //   color: Colors.green[50],
+                    //   child: Column(
+                    //     crossAxisAlignment: CrossAxisAlignment.center,
+                    //     children: [
+                    //       SizedBox(height: 16,),
+                    //       Text( "Pengumuman", style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, fontFamily: "mon" )),                        
+                    //       SizedBox(height: 10),
+                    //       Divider(height: 1, color: Colors.green,),                        
+                    //       SizedBox(
+                    //         child: ListView.builder(
+                    //           shrinkWrap: true,
+                    //           physics: BouncingScrollPhysics(),
+                    //           itemCount: _pengumumanList.length,
+                    //           itemBuilder: (BuildContext context, int index){
+                    //             return Column(
+                    //               crossAxisAlignment: CrossAxisAlignment.start,
+                    //               children: <Widget>[
+                    //                 PengumumanItem(_pengumumanList[index][0], _pengumumanList[index][1], _pengumumanList[index][2], _pengumumanList[index][3], _pengumumanList[index][4]),
+                    //                 Divider(height: 1, color: Colors.green,),
+                    //               ],
+                    //             );
+                    //           },
+                    //         ),
+                    //       ),
+                    //     ],                        
+                    //   ),
+                    // ),
                   ],
                 ),
               ),

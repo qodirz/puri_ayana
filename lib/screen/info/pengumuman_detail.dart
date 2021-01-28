@@ -12,8 +12,9 @@ class PengumumanItem extends StatefulWidget {
   bool isRead;
   final title;
   final description; 
+  final date;
 
-  PengumumanItem(this.pengumumanID, this.title, this.description, this.isRead);
+  PengumumanItem(this.pengumumanID, this.title, this.description, this.isRead, this.date);
 
   @override
   _PengumumanItemState createState() => _PengumumanItemState();
@@ -72,7 +73,7 @@ class _PengumumanItemState extends State<PengumumanItem> {
     return FlatButton(
       padding: EdgeInsets.all(0) ,
       onPressed: () {
-        _settingModalBottomSheet(context, widget.title, widget.description);          
+        _settingModalBottomSheet(context, widget.title, widget.description, widget.date);          
         setState(() {
           widget.isRead = true;
         });
@@ -89,30 +90,66 @@ class _PengumumanItemState extends State<PengumumanItem> {
           style: TextStyle(fontFamily: "mon",),
           overflow: TextOverflow.ellipsis,                                
         ),
-        subtitle: Text(widget.description,
-          style: TextStyle(fontFamily: "mon",),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
+        subtitle: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(widget.description, style: TextStyle(fontFamily: "mon",),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(widget.date, style: TextStyle(fontFamily: "mon", fontSize: 12, color: Colors.grey),)
+            ),
+          ],
         ),
       ),
     );    
   }
 
-  void _settingModalBottomSheet(context, title, description){
+  void _settingModalBottomSheet(context, title, description, date){
       showModalBottomSheet(
+        backgroundColor: Colors.transparent,
+        isScrollControlled:true,
         context: context,
         builder: (BuildContext bc){
           return Container(
+            decoration: new BoxDecoration(
+              color: Colors.white,
+              borderRadius: new BorderRadius.only(
+                topLeft: const Radius.circular(20),
+                topRight: const Radius.circular(20)
+              )
+            ),
             child: new Wrap(
             children: <Widget>[
-              new ListTile(
-                title: new Text(title, style: TextStyle(fontFamily: "mon", fontWeight: FontWeight.bold),),
-                onTap: () => {}          
-              ),
-              Divider(height: 1, color: Colors.green,), 
-              new ListTile(
-                title: new Text(description, style: TextStyle(fontFamily: "mon"),),
-                onTap: () => {},          
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [                   
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(title, style: TextStyle(fontFamily: "mon", fontWeight: FontWeight.bold, fontSize: 20),),
+                    ),
+                    SizedBox(height: 4,),                    
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(date, style: TextStyle(fontFamily: "mon", color: Colors.grey, fontSize: 16)),
+                    ),
+                    SizedBox(height: 10,),
+                    Divider(height: 1, color: Colors.green,), 
+                    SizedBox(height: 10,),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(description, style: TextStyle(fontFamily: "mon", fontSize: 15)),
+                    ),
+                    SizedBox(height: 40,),                    
+                  ],
+                ),
               ),
             ],
           ),

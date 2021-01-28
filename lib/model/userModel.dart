@@ -9,7 +9,8 @@ class UserModel {
       this.role,
       this.addressId,
       this.picBlok,
-      this.avatar
+      this.avatar,
+      this.kk
   });
 
   int id;
@@ -22,6 +23,7 @@ class UserModel {
   int addressId;
   dynamic picBlok;
   String avatar;
+  bool kk;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -34,7 +36,8 @@ class UserModel {
       role: json["role"],
       addressId: json["address_id"],
       picBlok: json["pic_blok"],
-      avatar: json["avatar"]
+      avatar: json["avatar"],
+      kk: json["kk"]
     );
   }
 }

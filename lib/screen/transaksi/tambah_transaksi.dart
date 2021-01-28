@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -64,37 +66,45 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
   }
 
   addTransaction() async {
-    print("post addTransaction");
-    final response = await http.post(NetworkURL.addTransaction(), 
-    headers: <String, String>{ 
-      'Content-Type': 'application/json; charset=UTF-8', 
-      'access-token': accessToken,
-      'expiry': expiry,
-      'uid': uid,
-      'client': client,
-      'token-type': "Bearer"
-    },body: jsonEncode(<String, dynamic>{   
-      "transaction_date": _dateTime.toString(),     
-      "transaction_type": paymentOption == "Debit" ? 1 : 2,
-      "transaction_group": paymentGroupSelected,
-      "total": totalController.numberValue, 
-      "description": descriptionController.text.trim(), 
-    }));
+    try{      
+      FocusScope.of(context).requestFocus(new FocusNode()); 
+      final response = await http.post(NetworkURL.addTransaction(), 
+      headers: <String, String>{ 
+        'Content-Type': 'application/json; charset=UTF-8', 
+        'access-token': accessToken,
+        'expiry': expiry,
+        'uid': uid,
+        'client': client,
+        'token-type': "Bearer"
+      },body: jsonEncode(<String, dynamic>{   
+        "transaction_date": _dateTime.toString(),     
+        "transaction_type": paymentOption == "Debit" ? 1 : 2,
+        "transaction_group": paymentGroupSelected,
+        "total": totalController.numberValue, 
+        "description": descriptionController.text.trim(), 
+      }));
+      
+      final responJson = json.decode(response.body);
+      if(responJson["success"] == true){   
+        FlushbarHelper.createSuccess(title: 'Berhasil',message: responJson["message"],).show(context);                    
+        setState(() {
+          totalController.text = '';
+          descriptionController.text = '';
+          isloading = false;  
+        });      
+      }else{
+        FlushbarHelper.createError(title: 'Berhasil',message: responJson["message"],).show(context);                 
+        setState(() {
+          isloading = false;         
+        }); 
+      }     
+    }on SocketException {
+      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);            
+    } catch (e) {
+      print(e);      
+      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);      
+    }
     
-    final responJson = json.decode(response.body);
-    if(responJson["success"] == true){   
-      FlushbarHelper.createSuccess(title: 'Berhasil',message: responJson["message"],).show(context);                    
-      setState(() {
-        totalController.text = '';
-        descriptionController.text = '';
-        isloading = false;  
-      });      
-    }else{
-      FlushbarHelper.createError(title: 'Berhasil',message: responJson["message"],).show(context);                 
-      setState(() {
-        isloading = false;         
-      }); 
-    }  
   }
  
   @override

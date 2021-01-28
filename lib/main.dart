@@ -74,8 +74,6 @@ Future<void> main() async {
   
   final storage = new FlutterSecureStorage();
   String accessToken = await storage.read(key: "accessToken");
-  print("MAIN => accessToken");
-  print(accessToken);
   var isLoggedIn = (accessToken == null) ? false : true;
 
   runApp(
