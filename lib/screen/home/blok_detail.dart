@@ -91,7 +91,7 @@ class _BlokDetailPagePageState extends State<BlokDetailPage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, size: 26),
           onPressed: () {
-            Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));            
+            Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));            
           },
         ), 
         title: Text("Blok Info "+ widget.blok, style: TextStyle(fontFamily: "mon")),

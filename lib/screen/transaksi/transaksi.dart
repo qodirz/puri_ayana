@@ -77,7 +77,6 @@ Widget cardList(title, page, context) {
         ),
         trailing: Icon(Icons.chevron_right, size: 26, color: Colors.green,),
         onTap: () {  
-          print(page);
           if (page == "cashflow"){
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CashflowPertahunPage()));  
           }else if (page == "transaksi_bulanan"){

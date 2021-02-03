@@ -50,8 +50,6 @@ class _CicilanPageState extends State<CicilanPage> {
       });
       
       final responJson = json.decode(response.body);
-      print("getCicilan");
-      print(responJson);
       if(responJson["success"] == true){
         final data = responJson["installments"];
         setState(() {
@@ -98,7 +96,7 @@ class _CicilanPageState extends State<CicilanPage> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
-              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));              
+              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));              
             },
           ), 
           title: Text("CICILAN", style: TextStyle(fontFamily: "mon")),

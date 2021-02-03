@@ -37,11 +37,63 @@ class _ProfilePageState extends State<ProfilePage> {
   var obSecurePwdConf = true;
 
   File _image;
-  pilihGallery() async {
-    final image = await ImagePicker.pickImage(source: ImageSource.gallery);    
+
+  fromGallery() async {
+    final image = await ImagePicker().getImage(source: ImageSource.gallery);  
     setState(() {
-      _image = image;
+      _image = File(image.path);
+      Navigator.pop(context);
     });    
+  }
+
+  fromCamera() async {
+    final image = await ImagePicker().getImage(source: ImageSource.camera);
+    setState(() {
+      _image = File(image.path);
+      Navigator.pop(context);
+    });    
+  }
+
+  void _modalImagePick(context){
+    showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      isScrollControlled:true,
+      context: context,
+      builder: (BuildContext bc){
+        return Container(
+          decoration: new BoxDecoration(
+            color: Colors.white,
+            borderRadius: new BorderRadius.only(
+              topLeft: const Radius.circular(20),
+              topRight: const Radius.circular(20)
+            )
+          ),
+          child: new Wrap(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [                   
+                  ListTile(
+                    title: Text("Foto Kamera"),
+                    onTap: () => {fromCamera()},
+                    leading: Icon(Icons.photo_camera),
+                  ),
+                  ListTile(
+                    title: Text("Foto Galeri"),
+                    onTap: () => {fromGallery()},
+                    leading: Icon(Icons.photo_library),
+                  ),
+                  SizedBox(height: 40,),                    
+                ],
+              ),
+            ),
+          ],
+        ),
+        );
+      }
+    );
   }
 
   Future getStorage() async {
@@ -124,6 +176,8 @@ class _ProfilePageState extends State<ProfilePage> {
         if (data['success'] == true) {
           userModel = UserModel.fromJson(data["me"]); 
           updateProfileStorage(userModel, data["avatar"]);
+          print("avatar");
+          print(data["avatar"]);
           setState(() {                         
             _image = null; 
             avatar = data["avatar"];
@@ -178,7 +232,7 @@ class _ProfilePageState extends State<ProfilePage> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
-              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
+              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
             },
           ), 
           title: Text("PROFIL", style: TextStyle(fontFamily: "mon")),
@@ -220,7 +274,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             right: 80,
                             child: Center(
                               child: InkWell(                          
-                                onTap: pilihGallery,
+                                onTap: () => {_modalImagePick(context)}, 
                                 child: CircleAvatar(
                                   backgroundColor: Colors.green[200],
                                   radius: 25.0,

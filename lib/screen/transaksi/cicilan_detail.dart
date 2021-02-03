@@ -21,7 +21,7 @@ class CicilanDetailPage extends StatefulWidget {
 class _CicilanDetailPageState extends State<CicilanDetailPage> {
   final storage = new FlutterSecureStorage();
   String accessToken, uid, expiry, client, description; 
-  dynamic totalPaid, remainingInstallment;
+  dynamic totalPaid = 0, remainingInstallment = 0;
   List _listInstallmentTransactions = [];  
   bool isLoading = false;
   
@@ -52,8 +52,6 @@ class _CicilanDetailPageState extends State<CicilanDetailPage> {
       });
       
       final responJson = json.decode(response.body);
-      print("getCicilanDetail");
-      print(responJson);
       if(responJson["success"] == true){
         final data = responJson["installment"];
         final installmentTransactionsData = responJson["installment_transactions"];
@@ -106,7 +104,7 @@ class _CicilanDetailPageState extends State<CicilanDetailPage> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
-              Navigator.push(context,MaterialPageRoute(builder: (context) => CicilanPage()));
+              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => CicilanPage()));
             },
           ), 
           title: Text("CICILAN DETAIL", style: TextStyle(fontFamily: "mon")),

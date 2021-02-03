@@ -108,7 +108,7 @@ class _TransaksiBulananPageState extends State<TransaksiBulananPage> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
-              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
+              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
             },
           ), 
           title: Text("TRANSAKSI BULANAN", style: TextStyle(fontFamily: "mon")),

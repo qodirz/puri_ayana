@@ -126,7 +126,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       SizedBox(height: 16,),
                       InkWell(
                         onTap: () {
-                          Navigator.push(context,EnterExitRoute(exitPage:  ForgotPassword(), enterPage: Login()));                          
+                          Navigator.pushReplacement(context,EnterExitRoute(exitPage:  ForgotPassword(), enterPage: Login()));                          
                         },
                         child: Text(
                           "Kembali ke Login?",

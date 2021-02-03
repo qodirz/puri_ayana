@@ -101,7 +101,7 @@ class _HutangPageState extends State<HutangPage> {
                       children: <Widget>[
                         InkWell(
                         onTap: () {
-                          Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
+                          Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
                         },
                         child: Icon(Icons.arrow_back, size: 30,),
                         ),

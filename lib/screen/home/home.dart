@@ -272,35 +272,7 @@ class _HomeState extends State<Home> {
                         ), 
                       ), 
                     ),
-                    Divider(height: 1, color: Colors.green,),                
-                    // Container(
-                    //   color: Colors.green[50],
-                    //   child: Column(
-                    //     crossAxisAlignment: CrossAxisAlignment.center,
-                    //     children: [
-                    //       SizedBox(height: 16,),
-                    //       Text( "Pengumuman", style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold, fontFamily: "mon" )),                        
-                    //       SizedBox(height: 10),
-                    //       Divider(height: 1, color: Colors.green,),                        
-                    //       SizedBox(
-                    //         child: ListView.builder(
-                    //           shrinkWrap: true,
-                    //           physics: BouncingScrollPhysics(),
-                    //           itemCount: _pengumumanList.length,
-                    //           itemBuilder: (BuildContext context, int index){
-                    //             return Column(
-                    //               crossAxisAlignment: CrossAxisAlignment.start,
-                    //               children: <Widget>[
-                    //                 PengumumanItem(_pengumumanList[index][0], _pengumumanList[index][1], _pengumumanList[index][2], _pengumumanList[index][3], _pengumumanList[index][4]),
-                    //                 Divider(height: 1, color: Colors.green,),
-                    //               ],
-                    //             );
-                    //           },
-                    //         ),
-                    //       ),
-                    //     ],                        
-                    //   ),
-                    // ),
+                    Divider(height: 1, color: Colors.green,),                   
                   ],
                 ),
               ),

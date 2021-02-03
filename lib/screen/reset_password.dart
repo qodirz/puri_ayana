@@ -128,7 +128,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                       PasswordField(controller: newPasswordController, hintText: "Password",),
                       SizedBox(height: 16,),
                       TextFormField(
-                        validator: (val) => MatchValidator(errorText: 'passwords tidak sama').validateMatch(val, newPasswordController.text),       
+                        validator: (val) => MatchValidator(errorText: 'passwords konfirmasi tidak sama').validateMatch(val, newPasswordController.text),       
                         controller: newPasswordConfirmationController,
                         obscureText: obSecureConfirmation,
                         decoration: InputDecoration(
@@ -181,7 +181,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                       SizedBox(height: 16,),
                       InkWell(
                         onTap: () {
-                          Navigator.push(context,EnterExitRoute(exitPage:  ResetPassword(), enterPage: Login()));                          
+                          Navigator.pushReplacement(context,EnterExitRoute(exitPage:  ResetPassword(), enterPage: Login()));                          
                         },
                         child: Text(
                           "Kembali ke login?",

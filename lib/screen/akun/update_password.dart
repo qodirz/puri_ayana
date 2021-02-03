@@ -23,20 +23,7 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController passwordConfirmationController = TextEditingController();
   String accessToken, uid, expiry, client;
-
-  final currentPasswordValidator = MultiValidator([  
-    RequiredValidator(errorText: 'password saat ini harus di isi!'),  
-    MinLengthValidator(8, errorText: 'sandi harus terdiri dari minimal 8 digit'),  
-    PatternValidator(r'([0-9])', errorText: 'kata sandi harus memiliki setidaknya satu angka')  
-  ]); 
-
-  final newPasswordValidator = MultiValidator([  
-    RequiredValidator(errorText: 'password baru harus di isi!'),  
-    MinLengthValidator(8, errorText: 'sandi harus terdiri dari minimal 8 digit'),  
-    PatternValidator(r'([0-9])', errorText: 'kata sandi harus memiliki setidaknya satu angka')  
-  ]); 
-
-  
+ 
   final _key = GlobalKey<FormState>();
   var obSecureCurrentPwd = true;
   var obSecurePwd = true;
@@ -123,7 +110,6 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
     } catch (e) {
       FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
     }
-      
   }
 
   @override
@@ -145,13 +131,13 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
-              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
+              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
             },
           ), 
           title: Text("UPDATE PASSWORD", style: TextStyle(fontFamily: "mon")),
           centerTitle: true,
         ),
-        body: Container(          
+        body: Container(
           child: Form(
             key: _key,
             child: Column(
@@ -167,7 +153,7 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
                       PasswordField(controller: passwordController, hintText: "Password",),                       
                       SizedBox(height: 16,),
                       TextFormField(
-                        validator: (val) => MatchValidator(errorText: 'passwords tidak sama').validateMatch(val, passwordConfirmationController.text),       
+                        validator: (val) => MatchValidator(errorText: 'passwords konfirmasi tidak sama').validateMatch(val, passwordController.text),       
                         controller: passwordConfirmationController,
                         obscureText: obSecurePwdConf,
                         decoration: InputDecoration(

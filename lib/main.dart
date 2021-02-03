@@ -3,6 +3,7 @@ import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/screen/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:puri_ayana_gempol/screen/splashscreen.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -79,7 +80,7 @@ Future<void> main() async {
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: isLoggedIn ? Menu() : Login(),
+      home: isLoggedIn ? Menu() : Splashscreen(),
     )
   );  
 }

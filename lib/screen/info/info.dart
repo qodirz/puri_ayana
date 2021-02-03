@@ -50,7 +50,7 @@ class _InfoPageState extends State<InfoPage> {
               children: <Widget>[
                 cardList('PENGUMUMAN', "pengumuman", context),
                 cardList('DATA WARGA', "data_warga", context),
-                if (role == "2" || role == "3") cardList('BUAT PENGUMUMAN', "buat_pengumuman", context),
+                if (role == "2") cardList('BUAT PENGUMUMAN', "buat_pengumuman", context),
               ],
             ),
           ],

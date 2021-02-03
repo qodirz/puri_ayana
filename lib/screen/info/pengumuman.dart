@@ -104,9 +104,9 @@ class _PengumumanPageState extends State<PengumumanPage> {
           icon: Icon(Icons.arrow_back, size: 26),
           onPressed: () {
             if (widget.from == "home"){
-              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
+              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
             }else{
-              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
+              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
             }
           },
         ), 

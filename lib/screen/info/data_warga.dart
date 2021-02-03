@@ -72,8 +72,6 @@ class _DataWargaPageState extends State<DataWargaPage>{
       });
       
       final responJson = json.decode(response.body);
-      print("getUsers");
-      print(responJson);
       if(responJson["success"] == true){
         final data = responJson["users"];
         setState(() {
@@ -147,7 +145,7 @@ class _DataWargaPageState extends State<DataWargaPage>{
       leading: IconButton(
         icon: Icon(Icons.arrow_back, size: 26),
         onPressed: () {
-          Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
+          Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
         },
       ), 
       backgroundColor: Colors.green,

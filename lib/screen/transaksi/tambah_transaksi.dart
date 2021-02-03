@@ -126,7 +126,7 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
-              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
+              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
             },
           ), 
           title: Text("TAMBAH TRANSAKSI", style: TextStyle(fontFamily: "mon")),

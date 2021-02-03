@@ -129,7 +129,7 @@ class _NewUserPageState extends State<NewUserPage> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
-              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
+              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
             },
           ), 
           title: Text("BUAT USER BARU", style: TextStyle(fontFamily: "mon")),

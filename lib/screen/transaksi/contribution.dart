@@ -55,8 +55,6 @@ class _ContributionPageState extends State<ContributionPage> {
       });
       
       final responJson = json.decode(response.body);
-      print("getContributions");
-      print(responJson);
       if(responJson["success"] == true){
         final data = responJson["contributions"];
         setState(() {
@@ -70,7 +68,6 @@ class _ContributionPageState extends State<ContributionPage> {
       }  
 
     } on SocketException {
-      print("ERROR.........");
       FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);            
     } catch (e) {
       print(e);      
@@ -102,9 +99,9 @@ class _ContributionPageState extends State<ContributionPage> {
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
               if (widget.from == "home"){
-                Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
+                Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
               }else{
-                Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
+                Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
               }
             },
           ), 

@@ -20,8 +20,6 @@ class CashflowModel {
   DateTime updatedAt;
 
   factory CashflowModel.fromJson(Map<String, dynamic> json) {
-    print("CashFlow from model");
-    print(json);
     return CashflowModel(
       id: json["id"],
       cashIn: json["cash_in"],

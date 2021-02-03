@@ -50,7 +50,6 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
   }
 
   buatPengumuman() async {
-    print("masuk buatPengumuman");
     final response = await http.post(NetworkURL.createNotification(), 
     headers: <String, String>{ 
       'Content-Type': 'application/json; charset=UTF-8', 
@@ -65,7 +64,6 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
     }));
     
     final responJson = json.decode(response.body);
-    print(responJson);
     
     if(responJson["success"] == true){
       FlushbarHelper.createSuccess(title: 'Berhasil',message: responJson["message"],).show(context);           
@@ -101,7 +99,7 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
-              Navigator.push(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
+              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 1)));
             },
           ), 
           title: Text("BUAT PENGUMUMAN", style: TextStyle(fontFamily: "mon")),

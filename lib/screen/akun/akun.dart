@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
 import 'package:puri_ayana_gempol/screen/akun/new_user.dart';
@@ -110,15 +111,16 @@ class _AkunPageState extends State<AkunPage> {
       );
     }
   }
-
+  
   @override
   void initState() {
     super.initState();
     getStorage();
   }
+
 	@override
 	Widget build(BuildContext context) {
-		return new Scaffold(
+    return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         toolbarHeight: 100,
@@ -152,7 +154,7 @@ class _AkunPageState extends State<AkunPage> {
           ],
         )
       ),
-		);
+    );
 	}
 }
 
@@ -166,7 +168,6 @@ Widget cardList(title, page, context) {
         ),
         trailing: Icon(Icons.chevron_right, size: 26, color: Colors.green,),
         onTap: () {
-          print(page);
           if (page == "profile"){
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ProfilePage()));  
           }else if(page == "update_password"){

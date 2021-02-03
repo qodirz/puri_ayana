@@ -178,7 +178,7 @@ class _LoginState extends State<Login> {
                       SizedBox(height: 16,),
                       InkWell(
                         onTap: () {
-                          Navigator.push(context,EnterExitRoute(exitPage: Login(), enterPage: ForgotPassword()));                          
+                          Navigator.pushReplacement(context,EnterExitRoute(exitPage: Login(), enterPage: ForgotPassword()));                          
                         },
                         child: Text(
                           "Lupa password?",
@@ -194,6 +194,7 @@ class _LoginState extends State<Login> {
           ),
         ),
       ),
-    );
+      );
+
   }
 }
