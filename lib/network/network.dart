@@ -1,5 +1,5 @@
 class NetworkURL {
-  static String server = "http://103.41.204.225";
+  static String server = "http://000.00.000.000";
 
   static String registrasi() {
     return "$server/api/v1/auth";
