@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:line_icons/line_icons.dart';
 import 'package:puri_ayana_gempol/screen/home/home.dart';
 import 'package:puri_ayana_gempol/screen/info/info.dart';
 import 'package:puri_ayana_gempol/screen/transaksi/transaksi.dart';
@@ -16,16 +14,16 @@ class Menu extends StatefulWidget {
 
 class _MenuState extends State<Menu> {
   int selectIndex = 0;
-  
+
   @override
   void initState() {
-    super.initState(); 
+    super.initState();
     setState(() {
       selectIndex = widget.selectIndex == null ? 0 : widget.selectIndex;
-    });    
+    });
   }
 
-  var padding = EdgeInsets.symmetric(horizontal: 18, vertical: 5);
+  var padding = EdgeInsets.symmetric(horizontal: 10, vertical: 10);
 
   @override
   Widget build(BuildContext context) {
@@ -51,74 +49,57 @@ class _MenuState extends State<Menu> {
             ),
           ],
         ),
-        bottomNavigationBar:SafeArea(            
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.green
+        bottomNavigationBar: BottomNavigationBar(
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          selectedFontSize: 0,
+          type: BottomNavigationBarType.fixed,
+          elevation: 20,
+          backgroundColor: Colors.lightBlue[700],
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              activeIcon: Icon(
+                Icons.home_filled,
+                color: Colors.white,
+                size: 40,
+              ),
+              icon: Icon(Icons.home_outlined, color: Colors.white60),
+              label: 'Home',
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 5),
-              child: GNav(
-                  curve: Curves.easeOutExpo,
-                  duration: Duration(milliseconds: 900),
-                  tabs: [
-                    GButton(                      
-                      gap: 2,
-                      iconActiveColor: Colors.black,
-                      iconColor: Colors.black,
-                      textColor: Colors.black,
-                      backgroundColor: Colors.green[200],
-                      iconSize: 24,
-                      padding: padding,
-                      icon: LineIcons.home,
-                      text: 'Home',
-                      textStyle: TextStyle(fontFamily: "mon"),
-                    ),
-                    GButton(
-                      gap: 2,
-                      iconActiveColor: Colors.black,
-                      iconColor: Colors.black,
-                      textColor: Colors.black,
-                      backgroundColor: Colors.green[200],
-                      iconSize: 24,
-                      padding: padding,
-                      icon: LineIcons.info_circle,
-                      text: 'Info',
-                      textStyle: TextStyle(fontFamily: "mon"),
-                    ),
-                    GButton(
-                      gap: 2,
-                      iconActiveColor: Colors.black,
-                      iconColor: Colors.black,
-                      textColor: Colors.black,
-                      backgroundColor: Colors.green[200],
-                      iconSize: 24,
-                      padding: padding,
-                      icon: LineIcons.money,                      
-                      text: 'Transaksi',
-                      textStyle: TextStyle(fontFamily: "mon"),
-                    ),
-                    GButton(
-                      gap: 2,
-                      iconActiveColor: Colors.black,
-                      iconColor: Colors.black,
-                      textColor: Colors.black,
-                      backgroundColor: Colors.green[200],
-                      iconSize: 24,
-                      padding: padding,
-                      icon: LineIcons.user,                      
-                      text: 'Akun',
-                      textStyle: TextStyle(fontFamily: "mon"),
-                    )
-                  ],
-                  selectedIndex: selectIndex,
-                  onTabChange: (index) {                                 
-                    setState(() {
-                      selectIndex = index;
-                    });                     
-                  }),
+            BottomNavigationBarItem(
+              activeIcon: Icon(
+                Icons.info_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+              icon: Icon(Icons.info_outline, color: Colors.white60),
+              label: 'Info',
             ),
-          ),
+            BottomNavigationBarItem(
+              activeIcon: Icon(
+                Icons.monetization_on,
+                color: Colors.white,
+                size: 40,
+              ),
+              icon: Icon(Icons.monetization_on_outlined, color: Colors.white60),
+              label: 'Transaksi',
+            ),
+            BottomNavigationBarItem(
+              activeIcon: Icon(
+                Icons.account_circle,
+                color: Colors.white,
+                size: 40,
+              ),
+              icon: Icon(Icons.account_circle_outlined, color: Colors.white60),
+              label: 'Profile',
+            ),
+          ],
+          currentIndex: selectIndex,
+          onTap: (indeks) {
+            setState(() {
+              selectIndex = indeks;
+            });
+          },
         ),
       ),
     );

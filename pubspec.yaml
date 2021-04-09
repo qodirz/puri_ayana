@@ -31,8 +31,6 @@ dependencies:
   firebase_messaging: ^7.0.3
   http: ^0.12.1
   flutter_secure_storage: ^3.3.5
-  google_nav_bar: ^3.1.0
-  line_icons: ^0.2.0
   badges: ^1.1.1
   image_picker: ^0.6.2+3
   intl: ^0.16.1
@@ -55,6 +53,10 @@ flutter:
   assets:
     - assets/img/
   fonts:
-    - family: mon
-      fonts:        
-        - asset: assets/font/Montserrat-Regular.ttf  
+    - family: regular
+      fonts:
+        - asset: assets/font/NotoSans-Regular.ttf
+    - family: bold
+      fonts:
+        - asset: assets/font/Roboto-Bold.ttf
+        

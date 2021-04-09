@@ -1,5 +1,6 @@
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:puri_ayana_gempol/custom/application_helper.dart';
 
 class FlushbarHelper {
   /// Get a success notification flushbar.
@@ -12,9 +13,9 @@ class FlushbarHelper {
       message: message,
       icon: Icon(
         Icons.check_circle,
-        color: Colors.green[300],
+        color: baseColor300,
       ),
-      leftBarIndicatorColor: Colors.green[300],
+      leftBarIndicatorColor: baseColor300,
       duration: duration,
     );
   }
@@ -58,7 +59,7 @@ class FlushbarHelper {
   /// Get a flushbar that can receive a user action through a button.
   static Flushbar createAction(
       {@required String message,
-      @required FlatButton button,
+      @required TextButton button,
       String title,
       Duration duration = const Duration(seconds: 3)}) {
     return Flushbar(

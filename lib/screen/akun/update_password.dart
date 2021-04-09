@@ -9,7 +9,7 @@ import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/custom/password_field.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/network/network.dart';
-import 'package:puri_ayana_gempol/custom/customButton.dart';
+import 'package:puri_ayana_gempol/custom/application_helper.dart';
 import 'package:http/http.dart' as http;
 
 class UpdatePasswordPage extends StatefulWidget {
@@ -21,16 +21,17 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
   final storage = new FlutterSecureStorage();
   TextEditingController currentPasswordController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  TextEditingController passwordConfirmationController = TextEditingController();
+  TextEditingController passwordConfirmationController =
+      TextEditingController();
   String accessToken, uid, expiry, client;
- 
+
   final _key = GlobalKey<FormState>();
   var obSecureCurrentPwd = true;
   var obSecurePwd = true;
   var obSecurePwdConf = true;
 
   Future getStorage() async {
-    String tokenStorage = await storage.read(key: "accessToken");     
+    String tokenStorage = await storage.read(key: "accessToken");
     String uidStorage = await storage.read(key: "uid");
     String expiryStorage = await storage.read(key: "expiry");
     String clientStorage = await storage.read(key: "client");
@@ -38,8 +39,8 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
       accessToken = tokenStorage;
       uid = uidStorage;
       expiry = expiryStorage;
-      client = clientStorage;      
-    });       
+      client = clientStorage;
+    });
   }
 
   cek() {
@@ -49,66 +50,63 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
   }
 
   submit() async {
-    try{
-      FocusScope.of(context).requestFocus(new FocusNode());   
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("Processing.."),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                CircularProgressIndicator(),
-                SizedBox( height: 16, ),
-                Text("Please wait...")
-              ],
-            ),
-          );
-        }
-      );
-      
-      final response = await http.put(NetworkURL.updatePassword(), 
-      headers: <String, String>{ 
-        'Content-Type': 'application/json; charset=UTF-8', 
-        'access-token': accessToken,
-        'expiry': expiry,
-        'uid': uid,
-        'client': client,
-        'token-type': "Bearer"
-      },body: jsonEncode(<String, String>{        
-        "current_password": currentPasswordController.text.trim(), 
-        "password": passwordController.text.trim(), 
-        "password_confirmation": passwordConfirmationController.text.trim(), 
-      }));
+    try {
+      FocusScope.of(context).requestFocus(new FocusNode());
+      customDialogWait(context);
+
+      final response = await http.put(NetworkURL.updatePassword(),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'access-token': accessToken,
+            'expiry': expiry,
+            'uid': uid,
+            'client': client,
+            'token-type': "Bearer"
+          },
+          body: jsonEncode(<String, String>{
+            "current_password": currentPasswordController.text.trim(),
+            "password": passwordController.text.trim(),
+            "password_confirmation": passwordConfirmationController.text.trim(),
+          }));
 
       final responJson = json.decode(response.body);
       if (responJson != null) {
         Navigator.pop(context);
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              content: Text(responJson['success'] == true ? "successfully updated password." : "failed update password!"),
-              actions: <Widget>[
-                FlatButton(
-                  onPressed: () => {
-                    responJson['success'] == true ? 
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)))
-                    : Navigator.pop(context)                  
-                  },
-                  child: Text("Ok"),
-                ),
-              ],
-            );
-          }
+        Widget okButton = OutlinedButton(
+          style: OutlinedButton.styleFrom(
+              primary: Colors.cyan,
+              backgroundColor: Colors.cyan[100],
+              side: BorderSide(color: Colors.cyan)),
+          onPressed: () => {
+            responJson['success'] == true
+                ? Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Menu(selectIndex: 3)),
+                  )
+                : Navigator.pop(context)
+          },
+          child: Text('ok'),
         );
-      }  
 
+        confirmDialogWithActions(
+            "Update Password",
+            (responJson['success'] == true
+                ? "successfully updated password."
+                : "failed update password!"),
+            [okButton],
+            context);
+      }
     } on SocketException {
-      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
+      FlushbarHelper.createError(
+        title: 'Error',
+        message: 'No Internet connection!',
+      ).show(context);
     } catch (e) {
-      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
+      FlushbarHelper.createError(
+        title: 'Error',
+        message: 'Error connection with server!',
+      ).show(context);
     }
   }
 
@@ -121,86 +119,112 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
-      statusBarColor: Colors.green[100], 
+      statusBarColor: baseColor100,
     ));
 
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.green,
+          backgroundColor: baseColor,
           leading: IconButton(
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
-              Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 3)));
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Menu(selectIndex: 3)));
             },
-          ), 
-          title: Text("UPDATE PASSWORD", style: TextStyle(fontFamily: "mon")),
+          ),
+          title: Text("UPDATE PASSWORD"),
           centerTitle: true,
         ),
-        body: Container(
-          child: Form(
-            key: _key,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[                
-                Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.all(10),
-                    children: <Widget>[
-                      SizedBox(height: 20,),   
-                      PasswordField(controller: currentPasswordController, hintText: "Password saat ini",),                                                              
-                      SizedBox(height: 16,),
-                      PasswordField(controller: passwordController, hintText: "Password",),                       
-                      SizedBox(height: 16,),
-                      TextFormField(
-                        validator: (val) => MatchValidator(errorText: 'passwords konfirmasi tidak sama').validateMatch(val, passwordController.text),       
-                        controller: passwordConfirmationController,
-                        obscureText: obSecurePwdConf,
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 20),
-                            filled: true,
-                            fillColor: Colors.white,
-                            hintText: "Password Konfirmasi",
-                            hintStyle: TextStyle(fontFamily: "mon"),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.green),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide:  BorderSide(color: Colors.green[400] ),
-                            ),
-                            errorBorder: OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(16.0),
-                              borderSide: BorderSide(color: Colors.green)
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                obSecurePwdConf ? Icons.visibility_off : Icons.visibility,
+        body: Stack(
+          children: [
+            mainBg(),
+            Container(
+              child: Form(
+                key: _key,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Expanded(
+                      child: ListView(
+                        padding: EdgeInsets.fromLTRB(40, 20, 40, 40),
+                        children: <Widget>[
+                          PasswordField(
+                            controller: currentPasswordController,
+                            hintText: "Password saat ini",
+                          ),
+                          PasswordField(
+                            controller: passwordController,
+                            hintText: "Password",
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Password Konfirmasi",
+                                style: TextStyle(
+                                    fontFamily: 'bold', color: baseColor900),
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  obSecurePwdConf = !obSecurePwdConf;
-                                });
+                              SizedBox(height: 4),
+                              TextFormField(
+                                validator: (val) => MatchValidator(
+                                        errorText:
+                                            'passwords konfirmasi tidak sama')
+                                    .validateMatch(
+                                        val, passwordController.text),
+                                controller: passwordConfirmationController,
+                                obscureText: obSecurePwdConf,
+                                decoration: InputDecoration(
+                                    contentPadding:
+                                        EdgeInsets.symmetric(horizontal: 10),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    border: OutlineInputBorder(
+                                      borderSide: BorderSide(color: baseColor),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius:
+                                          new BorderRadius.circular(10),
+                                      borderSide:
+                                          BorderSide(color: baseColor400),
+                                    ),
+                                    errorBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            new BorderRadius.circular(10),
+                                        borderSide:
+                                            BorderSide(color: baseColor)),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        obSecurePwdConf
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          obSecurePwdConf = !obSecurePwdConf;
+                                        });
+                                      },
+                                    )),
+                              ),
+                              SizedBox(height: 16)
+                            ],
+                          ),
+                          InkWell(
+                              onTap: () {
+                                cek();
                               },
-                            )),
+                              child: customButton("UBAH PASSWORD")),
+                        ],
                       ),
-                      SizedBox(height: 16,),
-                      InkWell(
-                        onTap: () {
-                          cek();
-                        },
-                        child: CustomButton(
-                          "UBAH PASSWORD",
-                          color: Colors.green[400],
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

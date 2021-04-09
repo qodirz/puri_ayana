@@ -9,43 +9,41 @@ class Splashscreen extends StatefulWidget {
   SplashscreenState createState() => SplashscreenState();
 }
 
-class SplashscreenState extends State<Splashscreen> { 
-
+class SplashscreenState extends State<Splashscreen> {
   final storage = new FlutterSecureStorage();
   String firstRun, firstRunStorage;
 
   Future getFirstRun() async {
-    print("masuk getFirstRun");
-    
-    String firstRunStorage = await storage.read(key: "firstRun");  
+    String firstRunStorage = await storage.read(key: "firstRun");
 
-    print(firstRunStorage);
     setState(() {
       firstRun = firstRunStorage;
     });
 
-    if(firstRunStorage == "false"){
-      Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Login()));      
-    }else{
-      await storage.write(key: "firstRun", value: "false");        
+    if (firstRunStorage == "false") {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => Login()));
+    } else {
+      await storage.write(key: "firstRun", value: "false");
       var duration = const Duration(seconds: 4);
-      return Timer(duration, (){
-        Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Login()));
+      return Timer(duration, () {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => Login()));
       });
-    }  
+    }
   }
-  
+
   @override
-  void initState() {  
-    super.initState();      
+  void initState() {
+    super.initState();
     getFirstRun();
   }
-  
+
   @override
   Widget build(BuildContext context) {
-    if(firstRun == "false"){
+    if (firstRun == "false") {
       return null;
-    }else{
+    } else {
       return Scaffold(
         backgroundColor: Colors.white,
         body: Center(

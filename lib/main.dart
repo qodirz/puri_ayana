@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:puri_ayana_gempol/menu.dart';
-import 'package:puri_ayana_gempol/screen/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:puri_ayana_gempol/screen/splashscreen.dart';
@@ -68,19 +67,18 @@ Future<void> main() async {
   await flutterLocalNotificationsPlugin.initialize(initializationSettings,
       onSelectNotification: (String payload) async {
     if (payload != null) {
-      debugPrint('notification payload: $payload');      
+      debugPrint('notification payload: $payload');
     }
     selectNotificationSubject.add(payload);
   });
-  
+
   final storage = new FlutterSecureStorage();
   String accessToken = await storage.read(key: "accessToken");
   var isLoggedIn = (accessToken == null) ? false : true;
 
-  runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: isLoggedIn ? Menu() : Splashscreen(),
-    )
-  );  
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(fontFamily: 'regular'),
+    home: isLoggedIn ? Menu() : Splashscreen(),
+  ));
 }

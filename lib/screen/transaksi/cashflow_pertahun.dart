@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:horizontal_data_table/horizontal_data_table.dart';
 import 'package:http/http.dart' as http;
+import 'package:puri_ayana_gempol/custom/application_helper.dart';
 import 'package:puri_ayana_gempol/custom/flushbar_helper.dart';
 import 'package:puri_ayana_gempol/menu.dart';
 import 'package:puri_ayana_gempol/model/cashflowModel.dart';
@@ -24,18 +25,18 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
   final storage = new FlutterSecureStorage();
   List<CashflowModel> _cashflowList = [];
 
-  String accessToken, uid, expiry, client, title, cashflowYear; 
-  dynamic totalCashIn = 0; 
+  String accessToken, uid, expiry, client, title, cashflowYear;
+  dynamic totalCashIn = 0;
   dynamic totalCashOut = 0;
   dynamic grandTotal = 0;
   bool isLoading = false;
 
   Future getStorage() async {
-    var date = new DateTime.now().toString(); 
-    var dateParse = DateTime.parse(date); 
+    var date = new DateTime.now().toString();
+    var dateParse = DateTime.parse(date);
     var year = dateParse.year.toString();
 
-    String tokenStorage = await storage.read(key: "accessToken");     
+    String tokenStorage = await storage.read(key: "accessToken");
     String uidStorage = await storage.read(key: "uid");
     String expiryStorage = await storage.read(key: "expiry");
     String clientStorage = await storage.read(key: "client");
@@ -43,27 +44,27 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
       accessToken = tokenStorage;
       uid = uidStorage;
       expiry = expiryStorage;
-      client = clientStorage; 
-      cashflowYear = year;    
-    });       
+      client = clientStorage;
+      cashflowYear = year;
+    });
     getCashFlows(cashflowYear);
   }
 
   getCashFlows(year) async {
-    try{
-      _cashflowList.clear();    
-      final response = await http.get(NetworkURL.cashFlow(year), 
-      headers: <String, String>{ 
-        'Content-Type': 'application/json; charset=UTF-8', 
+    try {
+      _cashflowList.clear();
+      final response =
+          await http.get(NetworkURL.cashFlow(year), headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
         'access-token': accessToken,
         'expiry': expiry,
         'uid': uid,
         'client': client,
         'token-type': "Bearer"
       });
-      
+
       final responJson = json.decode(response.body);
-      if(responJson["success"] == true){
+      if (responJson["success"] == true) {
         final data = responJson["cash_flows"];
         setState(() {
           isLoading = false;
@@ -73,18 +74,21 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
           grandTotal = responJson["grand_total"];
           for (Map i in data) {
             _cashflowList.add(CashflowModel.fromJson(i));
-          }          
+          }
         });
-      }else{
-
-      }
-
+      } else {}
     } on SocketException {
-      FlushbarHelper.createError(title: 'Error',message: 'No Internet connection!',).show(context);      
+      FlushbarHelper.createError(
+        title: 'Error',
+        message: 'No Internet connection!',
+      ).show(context);
     } catch (e) {
       print(e);
-      FlushbarHelper.createError(title: 'Error',message: 'Error connection with server!',).show(context);
-    }  
+      FlushbarHelper.createError(
+        title: 'Error',
+        message: 'Error connection with server!',
+      ).show(context);
+    }
   }
 
   @override
@@ -96,37 +100,42 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
-      statusBarColor: Colors.green[100], 
+      statusBarColor: baseColor100,
     ));
 
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.green,
+          backgroundColor: baseColor,
           leading: IconButton(
             icon: Icon(Icons.arrow_back, size: 26),
             onPressed: () {
-              if (widget.from == "home"){
-                Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 0)));
-              }else{
-                Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) => Menu(selectIndex: 2)));
+              if (widget.from == "home") {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Menu(selectIndex: 0)));
+              } else {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Menu(selectIndex: 2)));
               }
             },
-          ), 
-          title: Text("CASHFLOW PERTAHUN", style: TextStyle(fontFamily: "mon")),
+          ),
+          title: Text("CASHFLOW PERTAHUN"),
           centerTitle: true,
         ),
-        body: Container(         
+        body: Container(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Expanded(
                 child: ListView(
-                  padding: EdgeInsets.all(10),
                   children: <Widget>[
-                    backgroundHeader(title), 
-                    _dataTableWidget(),   
-                    _totalCash(),                
+                    backgroundHeader(title),
+                    _dataTableWidget(),
+                    _totalCash(),
                   ],
                 ),
               ),
@@ -138,31 +147,29 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
   }
 
   Widget _dataTableWidget() {
-    if(isLoading == true){
-      return Container(      
-        height: 100,
-        color: Colors.green[50],
-        child: Center(
-          child: CircularProgressIndicator(
-            backgroundColor: Colors.white,
-          )
-        )
-      );
-    }else{
-      if(totalCashIn == 0){
-        return Container(      
+    if (isLoading == true) {
+      return Container(
           height: 100,
-          color: Colors.green[50],
+          color: baseColor50,
           child: Center(
-            child: Text("NO DATA", style: TextStyle(fontFamily: "mon"),),
-          )
-        );  
-      }else{
-        return Container(      
-          height: (MediaQuery.of(context).size.height - 350),
+              child: CircularProgressIndicator(
+            backgroundColor: Colors.white,
+          )));
+    } else {
+      if (totalCashIn == 0) {
+        return Container(
+          height: 100,
+          color: baseColor50,
+          child: Center(
+            child: Text("NO DATA"),
+          ),
+        );
+      } else {
+        return Container(
+          height: (MediaQuery.of(context).size.height - 300),
           child: HorizontalDataTable(
             leftHandSideColumnWidth: 100,
-            rightHandSideColumnWidth: 450,
+            rightHandSideColumnWidth: 260,
             isFixedHeader: true,
             headerWidgets: _getTitleWidget(),
             leftSideItemBuilder: _generateFirstColumnRow,
@@ -173,30 +180,31 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
               height: 1.0,
               thickness: 1.0,
             ),
-            leftHandSideColBackgroundColor: Colors.green[50],
-            rightHandSideColBackgroundColor: Colors.green[50],
-          ),      
+            leftHandSideColBackgroundColor: baseColor50,
+            rightHandSideColBackgroundColor: baseColor50,
+          ),
         );
       }
     }
-    
   }
 
   List<Widget> _getTitleWidget() {
-    return [      
-      _getTitleItemWidget('Bulan', 100),      
-      _getTitleItemWidget('Cash In', 150),
-      _getTitleItemWidget('Cash Out', 150),
-      _getTitleItemWidget('Total', 150),
+    return [
+      _getTitleItemWidget('Bulan', 100),
+      _getTitleItemWidget('Cash In', 130),
+      _getTitleItemWidget('Cash Out', 130)
     ];
   }
 
   Widget _getTitleItemWidget(String label, double width) {
     return Container(
-      color: Colors.green[100],
-      child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "mon")),
+      color: baseColor100,
+      child: Text(label,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          )),
       width: width,
-      height: 56,
+      height: 48,
       padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
       alignment: Alignment.centerLeft,
     );
@@ -204,10 +212,10 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
 
   Widget _generateFirstColumnRow(BuildContext context, int index) {
     return Container(
-      color: Colors.green[100],
+      color: baseColor100,
       child: Text(_cashflowList[index].month.toString()),
-      width: 50,
-      height: 52,
+      width: 20,
+      height: 40,
       padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
       alignment: Alignment.centerLeft,
     );
@@ -215,29 +223,25 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
 
   Widget _generateRightHandSideColumnRow(BuildContext context, int index) {
     return Row(
-      children: <Widget>[       
+      children: <Widget>[
         Container(
-          child: Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_cashflowList[index].cashIn)),
-          width: 150,
-          height: 52,
+          child: Text(NumberFormat.currency(
+                  locale: 'id', symbol: 'Rp ', decimalDigits: 0)
+              .format(_cashflowList[index].cashIn)),
+          width: 130,
+          height: 40,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
           alignment: Alignment.centerLeft,
         ),
         Container(
-          child: Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_cashflowList[index].cashOut)),
-          width: 150,
-          height: 52,
+          child: Text(NumberFormat.currency(
+                  locale: 'id', symbol: 'Rp ', decimalDigits: 0)
+              .format(_cashflowList[index].cashOut)),
+          width: 130,
+          height: 40,
           padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
           alignment: Alignment.centerLeft,
         ),
-        Container(
-          child: _cashflowList[index].total < 0 ? Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_cashflowList[index].total), style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)) : 
-            Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(_cashflowList[index].total), style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold)),
-          width: 150,
-          height: 52,
-          padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-          alignment: Alignment.centerLeft,
-        )
       ],
     );
   }
@@ -247,30 +251,90 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
       children: <Widget>[
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[  
+          children: <Widget>[
             Expanded(
               child: Container(
-                height: 60,
-                color: Colors.green[300],
-                child: Column(children: <Widget>[
-                  SizedBox(height: 10),
-                  Text("Total Cash in", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: "mon")),
-                  totalCashIn < 0 ? Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(totalCashIn), style: TextStyle(color: Colors.red[100], fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")) : 
-                  Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(totalCashIn), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")),
-                ],)
-              ),
+                  height: 60,
+                  color: baseColor300,
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: 10),
+                      Text(
+                        "Total Cash in",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      totalCashIn < 0
+                          ? Text(
+                              NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp ',
+                                      decimalDigits: 0)
+                                  .format(totalCashIn),
+                              style: TextStyle(
+                                color: Colors.red[100],
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            )
+                          : Text(
+                              NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp ',
+                                      decimalDigits: 0)
+                                  .format(totalCashIn),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                    ],
+                  )),
             ),
             Expanded(
               child: Container(
-                height: 60,
-                color: Colors.green[300],
-                child: Column(children: <Widget>[
-                  SizedBox(height: 10),
-                  Text("Total Cash Out", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontFamily: "mon")),
-                  totalCashIn < 0 ? Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(totalCashOut), style: TextStyle(color: Colors.red[100], fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")) : 
-                  Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(totalCashOut), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon")),
-                ],)
-              ),
+                  height: 60,
+                  color: baseColor300,
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(height: 10),
+                      Text(
+                        "Total Cash Out",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      totalCashIn < 0
+                          ? Text(
+                              NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp ',
+                                      decimalDigits: 0)
+                                  .format(totalCashOut),
+                              style: TextStyle(
+                                color: Colors.red[100],
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            )
+                          : Text(
+                              NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp ',
+                                      decimalDigits: 0)
+                                  .format(totalCashOut),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                    ],
+                  )),
             )
           ],
         ),
@@ -278,14 +342,21 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
           children: <Widget>[
             Expanded(
               child: Container(
-                height: 60,
-                width: 140,
-                color: Colors.teal[400],
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text("Grand Total:", style: TextStyle(color: Colors.yellowAccent, fontWeight: FontWeight.bold, fontSize: 18, fontFamily: "mon"), textAlign: TextAlign.right,),
-                )
-              ),
+                  height: 60,
+                  width: 140,
+                  color: Colors.teal[400],
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      "Grand Total:",
+                      style: TextStyle(
+                        color: Colors.yellowAccent,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                      textAlign: TextAlign.right,
+                    ),
+                  )),
             ),
             Expanded(
               child: Container(
@@ -293,8 +364,27 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
                 color: Colors.teal[400],
                 child: Align(
                   alignment: Alignment.center,
-                  child: grandTotal < 0 ? Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(grandTotal), style: TextStyle(color: Colors.red[200], fontWeight: FontWeight.bold, fontSize: 20, fontFamily: "mon")) : 
-                  Text(NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(grandTotal), style: TextStyle(color: Colors.yellowAccent, fontWeight: FontWeight.bold, fontSize: 20, fontFamily: "mon")), 
+                  child: grandTotal < 0
+                      ? Text(
+                          NumberFormat.currency(
+                                  locale: 'id', symbol: 'Rp ', decimalDigits: 0)
+                              .format(grandTotal),
+                          style: TextStyle(
+                            color: Colors.red[200],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        )
+                      : Text(
+                          NumberFormat.currency(
+                                  locale: 'id', symbol: 'Rp ', decimalDigits: 0)
+                              .format(grandTotal),
+                          style: TextStyle(
+                            color: Colors.yellowAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
                 ),
               ),
             )
@@ -306,29 +396,14 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
 
   Widget backgroundHeader(title) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft:Radius.circular(30), topRight: Radius.circular(30)
-        ),
-        color: Colors.green
-      ),
-      height: 120,
-      width: double.infinity,  
+      color: Colors.lightBlue[600],
+      // height: 120,
+      width: double.infinity,
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[          
-            Padding(
-              padding: EdgeInsets.fromLTRB(16, 10, 16, 10),
-              child: title == null ? Container( margin: EdgeInsets.only(top: 10), width: 20, height: 20, child: CircularProgressIndicator(
-                  backgroundColor: Colors.white,
-                )) : 
-                Text("$title", 
-                style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold, fontFamily: "mon"),
-                textAlign: TextAlign.center,
-              ),
-            ),
+          children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -338,15 +413,27 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
                     setState(() {
                       cashflowYear = year.toString();
                       isLoading = true;
-                    });                    
+                    });
                     getCashFlows(year.toString());
                   },
                   shape: const StadiumBorder(),
-                  color: Colors.green[200],
+                  color: baseColor200,
                   splashColor: Colors.orange,
                   disabledColor: Colors.grey,
                   disabledTextColor: Colors.white,
-                  child: Text('Prev', style: TextStyle(fontFamily: "mon", color: Colors.white),),
+                  child: Text(
+                    'Prev',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                Text(
+                  title == null ? "" : title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontFamily: 'bold',
+                  ),
+                  textAlign: TextAlign.center,
                 ),
                 MaterialButton(
                   onPressed: () {
@@ -354,15 +441,18 @@ class _CashflowPertahunPageState extends State<CashflowPertahunPage> {
                     setState(() {
                       cashflowYear = year.toString();
                       isLoading = true;
-                    });                    
+                    });
                     getCashFlows(year.toString());
                   },
                   shape: const StadiumBorder(),
-                  color: Colors.green[200],
+                  color: baseColor200,
                   splashColor: Colors.orange,
                   disabledColor: Colors.grey,
                   disabledTextColor: Colors.white,
-                  child: Text('Next', style: TextStyle(fontFamily: "mon", color: Colors.white),),
+                  child: Text(
+                    'Next',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             )
