@@ -36,7 +36,6 @@ void customDialogWait(context) {
     context: context,
     builder: (context) {
       return AlertDialog(
-        backgroundColor: baseColor50,
         title: Text(
           "Processing...",
           style: TextStyle(
@@ -72,7 +71,6 @@ confirmDialogWithActions(title, content, actions, context) {
     context: context,
     builder: (context) {
       return AlertDialog(
-        backgroundColor: baseColor50,
         title: Text(title),
         content: Text(content),
         actions: <Widget>[for (var i in actions) i],

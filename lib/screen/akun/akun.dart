@@ -41,27 +41,25 @@ class _AkunPageState extends State<AkunPage> {
   _logOut() {
     Widget yesButton = OutlinedButton(
       style: OutlinedButton.styleFrom(
-        primary: Colors.cyan,
-        backgroundColor: Colors.cyan[100],
-        side: BorderSide(color: Colors.cyan),
+        primary: Colors.blue,
+        side: BorderSide(color: Colors.blue),
       ),
       onPressed: () {
         signOut();
       },
-      child: Text('yes'),
+      child: Text('Ya'),
     );
 
     Widget noButton = OutlinedButton(
       style: OutlinedButton.styleFrom(
-        primary: Colors.orange,
-        backgroundColor: Colors.orange[50],
-        side: BorderSide(color: Colors.orange),
+        primary: Colors.red,
+        side: BorderSide(color: Colors.red),
       ),
       onPressed: () => Navigator.pop(context),
-      child: Text('no'),
+      child: Text('Tidak'),
     );
 
-    confirmDialogWithActions("Warning", "Are you sure want sign out?",
+    confirmDialogWithActions("Logout", "Apakah anda yakin akan log out?",
         [noButton, yesButton], context);
   }
 

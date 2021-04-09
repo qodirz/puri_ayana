@@ -111,34 +111,27 @@ class _IuranBulananPageState extends State<IuranBulananPage> {
   _confirmDialog() {
     Widget yesButton = OutlinedButton(
       style: OutlinedButton.styleFrom(
-        primary: Colors.cyan,
-        backgroundColor: Colors.cyan[100],
-        side: BorderSide(color: Colors.cyan),
+        primary: Colors.blue,
+        side: BorderSide(color: Colors.blue),
       ),
       onPressed: () {
         payContribution();
-        setState(() {
-          submitted = true;
-        });
+        setState(() => {submitted = true});
       },
-      child: Text('yes'),
+      child: Text('Ya'),
     );
 
     Widget noButton = OutlinedButton(
       style: OutlinedButton.styleFrom(
-        primary: Colors.orange,
-        backgroundColor: Colors.orange[50],
-        side: BorderSide(color: Colors.orange),
+        primary: Colors.red,
+        side: BorderSide(color: Colors.red),
       ),
       onPressed: () => Navigator.pop(context),
-      child: Text('no'),
+      child: Text('Tidak'),
     );
 
-    confirmDialogWithActions(
-        "Warning",
-        "Apakah Anda Yakin Akan Membayar IURAN?",
-        [noButton, yesButton],
-        context);
+    confirmDialogWithActions("Iuran", "Apakah Anda Yakin Akan Membayar IURAN?",
+        [noButton, yesButton], context);
   }
 
   payContribution() async {

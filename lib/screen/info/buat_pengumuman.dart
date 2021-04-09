@@ -44,28 +44,24 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
   _confirmDialog() {
     Widget yesButton = OutlinedButton(
       style: OutlinedButton.styleFrom(
-        primary: Colors.cyan,
-        backgroundColor: Colors.cyan[100],
-        side: BorderSide(color: Colors.cyan),
+        primary: Colors.blue,
+        side: BorderSide(color: Colors.blue),
       ),
-      onPressed: () {
-        cek();
-      },
-      child: Text('yes'),
+      onPressed: () => {Navigator.pop(context), buatPengumuman()},
+      child: Text('YA'),
     );
 
     Widget noButton = OutlinedButton(
       style: OutlinedButton.styleFrom(
-        primary: Colors.orange,
-        backgroundColor: Colors.orange[50],
-        side: BorderSide(color: Colors.orange),
+        primary: Colors.red,
+        side: BorderSide(color: Colors.red),
       ),
       onPressed: () => Navigator.pop(context),
-      child: Text('no'),
+      child: Text('Tidak'),
     );
 
     confirmDialogWithActions(
-        "Warning",
+        "Pengumuman",
         "Apakah Anda Yakin Akan Membuat Pengumuman?",
         [noButton, yesButton],
         context);
@@ -73,14 +69,13 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
 
   cek() {
     if (_key.currentState.validate()) {
-      setState(() {
-        isloading = true;
-      });
-      buatPengumuman();
+      _confirmDialog();
     }
   }
 
   buatPengumuman() async {
+    setState(() => {isloading = true});
+    customDialogWait(context);
     final response = await http.post(NetworkURL.createNotification(),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
@@ -112,9 +107,7 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
         title: 'Error',
         message: responJson["message"],
       ).show(context);
-      setState(() {
-        isloading = false;
-      });
+      setState(() => {isloading = false});
     }
   }
 
@@ -224,7 +217,7 @@ class _BuatPengumumanPageState extends State<BuatPengumumanPage> {
         width: double.infinity,
         child: InkWell(
           onTap: () {
-            _confirmDialog();
+            cek();
           },
           child: customButton("SIMPAN"),
         ),

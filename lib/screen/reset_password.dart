@@ -61,16 +61,14 @@ class _ResetPasswordState extends State<ResetPassword> {
 
         Widget okButton = OutlinedButton(
           style: OutlinedButton.styleFrom(
-              primary: Colors.cyan,
-              backgroundColor: Colors.cyan[100],
-              side: BorderSide(color: Colors.cyan)),
+              primary: Colors.blue, side: BorderSide(color: Colors.blue)),
           onPressed: () => {
             responJson['success'] == true
                 ? Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (context) => Login()))
                 : Navigator.pop(context)
           },
-          child: Text('ok'),
+          child: Text('OK'),
         );
 
         confirmDialogWithActions(

@@ -55,28 +55,27 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
   _confirmDialog(type) {
     Widget yesButton = OutlinedButton(
       style: OutlinedButton.styleFrom(
-        primary: Colors.cyan,
-        backgroundColor: Colors.cyan[100],
-        side: BorderSide(color: Colors.cyan),
+        primary: Colors.blue,
+        side: BorderSide(color: Colors.blue),
       ),
       onPressed: () {
-        cek(type);
+        addTransaction(type);
+        setState(() => {isloading = true});
       },
-      child: Text('yes'),
+      child: Text('Ya'),
     );
 
     Widget noButton = OutlinedButton(
       style: OutlinedButton.styleFrom(
-        primary: Colors.orange,
-        backgroundColor: Colors.orange[50],
-        side: BorderSide(color: Colors.orange),
+        primary: Colors.red,
+        side: BorderSide(color: Colors.red),
       ),
       onPressed: () => Navigator.pop(context),
-      child: Text('no'),
+      child: Text('Tidak'),
     );
 
     confirmDialogWithActions(
-        "Warning",
+        "Transaksi",
         "Apakah Anda Yakin Akan Menambah Transaksi?",
         [noButton, yesButton],
         context);
@@ -89,10 +88,7 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
           tglError = true;
         });
       } else {
-        addTransaction(type);
-        setState(() {
-          isloading = true;
-        });
+        _confirmDialog(type);
       }
     }
   }
@@ -181,7 +177,6 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
             title: Text("TAMBAH TRANSAKSI"),
             centerTitle: true,
             bottom: TabBar(
-              //labelColor: Colors.red,
               tabs: [
                 Tab(
                   text: "PEMASUKAN",
@@ -191,20 +186,28 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
               ],
             ),
           ),
-          body: TabBarView(
-            children: [
-              Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Expanded(
-                      child: ListView(
-                        padding: EdgeInsets.fromLTRB(40, 20, 40, 40),
-                        children: <Widget>[
-                          Form(
-                            key: _key,
-                            child: Column(
+          body: Form(
+            key: _key,
+            child: TabBarView(
+              children: [
+                Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Expanded(
+                        child: ListView(
+                          padding: EdgeInsets.fromLTRB(40, 20, 40, 40),
+                          children: <Widget>[
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                Text(
+                                  "Pemasukan",
+                                  style: TextStyle(
+                                    fontFamily: 'bold',
+                                    fontSize: 20,
+                                  ),
+                                ),
                                 SizedBox(height: 20),
                                 _transactionDateField(),
                                 SizedBox(height: 10),
@@ -215,25 +218,30 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
                                 _btnTambahTransaksi("PEMASUKAN"),
                               ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Expanded(
-                      child: ListView(
-                        padding: EdgeInsets.fromLTRB(40, 20, 40, 40),
-                        children: <Widget>[
-                          Form(
-                            key: _key,
-                            child: Column(
+                Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Expanded(
+                        child: ListView(
+                          padding: EdgeInsets.fromLTRB(40, 20, 40, 40),
+                          children: <Widget>[
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                Text(
+                                  "Pengeluaran",
+                                  style: TextStyle(
+                                    fontFamily: 'bold',
+                                    fontSize: 20,
+                                  ),
+                                ),
                                 SizedBox(height: 20),
                                 _transactionDateField(),
                                 _totalField(),
@@ -243,14 +251,14 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
                                 _btnTambahTransaksi("PENGELUARAN"),
                               ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           )),
     ));
   }
@@ -472,10 +480,8 @@ class _TambahTransaksiPageState extends State<TambahTransaksiPage> {
       return Container(
         width: double.infinity,
         child: InkWell(
-          onTap: () {
-            _confirmDialog(type);
-          },
-          child: customButton("SIMPAN $type"),
+          onTap: () => {cek(type)},
+          child: customButton("SIMPAN"),
         ),
       );
     }

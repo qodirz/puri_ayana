@@ -74,9 +74,7 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
         Navigator.pop(context);
         Widget okButton = OutlinedButton(
           style: OutlinedButton.styleFrom(
-              primary: Colors.cyan,
-              backgroundColor: Colors.cyan[100],
-              side: BorderSide(color: Colors.cyan)),
+              primary: Colors.blue, side: BorderSide(color: Colors.blue)),
           onPressed: () => {
             responJson['success'] == true
                 ? Navigator.pushReplacement(
@@ -90,10 +88,10 @@ class _UpdatePasswordState extends State<UpdatePasswordPage> {
         );
 
         confirmDialogWithActions(
-            "Update Password",
+            "Ubah Password",
             (responJson['success'] == true
-                ? "successfully updated password."
-                : "failed update password!"),
+                ? "Berhasil ubah password."
+                : "Gagal ubah password!"),
             [okButton],
             context);
       }
